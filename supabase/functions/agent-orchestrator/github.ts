@@ -1,0 +1,7 @@
+// O destino e a branch são fixos para impedir SSRF e leitura de outros projetos.
+export function validatePath(path:unknown):string {
+ if(typeof path!=='string'||path.length>500||path.includes('..')||path.startsWith('/')||path.includes('\\'))throw new Error('INVALID_PATH');
+ if(/(^|\/)(\.env[^/]*|\.git|[^/]*(secret|credential|private.key)[^/]*)(\/|$)/i.test(path)||/\.(pem|pfx|key|p12)$/i.test(path))throw new Error('SENSITIVE_FILE');
+ return path;
+}
+export async function readGithub(path:unknown,token:string|null){const safe=validatePath(path);if(!token)throw new Error('GITHUB_NOT_CONFIGURED');const url=`https://api.github.com/repos/RPA-Automatic/portal-orchestrator-ai/contents/${safe.split('/').map(encodeURIComponent).join('/')}?ref=dev`;const response=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'portal-orchestrator-ai'},signal:AbortSignal.timeout(15000),redirect:'error'});if(!response.ok)throw new Error('GITHUB_ACCESS');const data=await response.json();if(Array.isArray(data))return {entries:data.map(f=>({name:f.name,path:f.path,type:f.type}))};if(data.type!=='file'||data.size>100000||data.encoding!=='base64')throw new Error('UNSUPPORTED_FILE');const bytes=Uint8Array.from(atob(data.content.replace(/\n/g,'')),c=>c.charCodeAt(0));const content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);if(content.includes('\u0000'))throw new Error('BINARY_FILE');return {path:data.path,content};}
