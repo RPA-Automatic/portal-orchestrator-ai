@@ -1,4 +1,4 @@
-name: Publicar dev na Netlify
+name: Publicar produção na Netlify
 on:
   workflow_dispatch:
 permissions:
@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 24

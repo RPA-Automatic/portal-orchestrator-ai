@@ -1,0 +1,20 @@
+flowchart TB
+    subgraph Control[Control plane]
+      UI[React/Vite]
+      Auth[Supabase Auth]
+      DB[(PostgreSQL/RLS)]
+      Edge[Edge Function]
+      UI --> Auth
+      UI --> Edge
+      Edge --> DB
+    end
+    subgraph Execution[Execution plane]
+      Current[Etapa por chamada do frontend]
+      Queue[Queue durável - planejada]
+      Worker[Worker isolado - planejado]
+      Gateway[Model/MCP gateways - planejados]
+      Queue -.-> Worker
+      Worker -.-> Gateway
+    end
+    Edge --> Current
+    Edge -. evolução .-> Queue

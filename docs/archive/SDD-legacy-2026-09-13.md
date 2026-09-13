@@ -1,5 +1,11 @@
 # Software Design Document
 
+> Status: Arquivado  
+> Responsável: @RodrigoFreitas16n91  
+> Versão: 0.1  
+> Última revisão: 2026-09-13  
+> Substituído por [`../architecture/SDD.md`](../architecture/SDD.md). Este documento preserva hipóteses e desenho-alvo anteriores à reconciliação com a implementação React/Vite atual.
+
 ## Code Agent Orchestrator Portal and ChatGPT Multi-Agent Operating Model
 
 **Author:** Rodrigo Feitosa Freitas  
@@ -664,4 +670,3 @@ Do not claim a tool, provider, MCP server or ChatGPT capability is available unt
 - [ChatGPT Workspace Agents for Enterprise and Business](https://help.openai.com/en/articles/20001143-chatgpt-workspace-agents-for-enterprise-and-business)
 - [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt)
 - [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-connectors-in-chatgpt)
-

@@ -1,0 +1,13 @@
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Testing: validar versão
+    Testing --> Published: aprovação
+    Testing --> Draft: correções
+    Published --> Deprecated: nova versão
+    Published --> Disabled: risco/incidente
+    Deprecated --> Disabled
+    Disabled --> [*]
+    note right of Draft
+      Fluxo planejado;
+      ainda não implementado.
+    end note

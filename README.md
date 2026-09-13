@@ -3,7 +3,7 @@
 Portal pessoal de agentes e automações, com interface em português, frontend React/TypeScript na Netlify e backend Supabase.
 
 - Aplicação: https://portal-orchestrator-ai.netlify.app
-- Repositório: RPA-Automatic/portal-orchestrator-ai, branch `dev`.
+- Repositório: RPA-Automatic/portal-orchestrator-ai. A `main` publica produção; a `dev` recebe integração contínua.
 - Supabase: projeto `lvsocwetuhhqxlwyfdrw`.
 
 ## Começar
@@ -42,7 +42,7 @@ O modo Demonstração produz textos fixos identificados e não consome IA. O mod
 
 ## Desenvolvimento
 
-Requer Node 22.13+ para build; Node 24 para executar os testes TypeScript diretamente.
+Requer Node 22.13+. A suíte usa `tsx` para carregar os módulos TypeScript da Edge Function de forma consistente no desenvolvimento e no CI.
 
 ```bash
 npm ci
@@ -67,12 +67,14 @@ supabase functions deploy agent-orchestrator --no-verify-jwt
 
 O modelo é configurado no segredo `OPENAI_MODEL` do backend (fallback existente `gpt-4.1-mini`). A chave pode ser cadastrada pelo usuário no portal; `OPENAI_API_KEY` no servidor permanece como fallback global. A criptografia deriva uma chave da credencial de serviço gerenciada pelo Supabase; sua rotação exige recadastro das credenciais. Para ambientes corporativos, migre para um KMS com versionamento de chaves.
 
-Netlify: build `npm run build`, publish `dist`, configuração em `netlify.toml`. O deploy realizado nesta entrega foi enviado pelo conector Netlify. Um fluxo GitHub Actions está incluído para publicar a branch dev quando os segredos `NETLIFY_AUTH_TOKEN` e `NETLIFY_SITE_ID` forem configurados no GitHub. Credenciais não foram adicionadas ao repositório.
+Netlify: build `npm run build`, publish `dist`, configuração em `netlify.toml`. O site está ligado à `main`. Um fluxo GitHub Actions manual publica a `main` quando os segredos `NETLIFY_AUTH_TOKEN` e `NETLIFY_SITE_ID` estiverem configurados no GitHub. Credenciais não foram adicionadas ao repositório.
 
 ## Referências
 
-- [SDD original](docs/SDD.md)
-- [Validação e pendências](docs/VALIDATION.md)
+- [Índice documental](docs/README.md)
+- [SDD atual](docs/architecture/SDD.md)
+- [Catálogo de agentes](docs/product/agent-catalog.md)
+- [Validação e pendências](docs/quality/validation.md)
 - [UiPath Orchestrator](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/introduction)
 - [UiPath Coding Agents](https://docs.uipath.com/pt-BR/coding-agents/standalone/latest/user-guide/overview)
 - [Supabase Auth](https://supabase.com/docs/reference/javascript/auth-signinwithpassword)

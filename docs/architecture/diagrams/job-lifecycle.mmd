@@ -1,0 +1,19 @@
+sequenceDiagram
+    actor User as Operador
+    participant UI as Portal
+    participant Edge as Edge Function
+    participant DB as Supabase
+    participant Model as Provedor
+    User->>UI: Iniciar tarefa
+    UI->>Edge: create run
+    Edge->>DB: Validar sessão e criar snapshot
+    loop Até quatro etapas
+        UI->>Edge: processar próxima etapa
+        Edge->>Model: gerar saída
+        Model-->>Edge: resultado ou erro
+        Edge->>DB: persistir etapa e evento
+    end
+    Edge-->>UI: waiting_approval
+    User->>UI: Aprovar ou rejeitar
+    UI->>Edge: decisão
+    Edge->>DB: estado final e auditoria
