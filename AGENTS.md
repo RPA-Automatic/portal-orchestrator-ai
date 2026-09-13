@@ -16,3 +16,7 @@ Trabalhe em português do Brasil. Leia `docs/README.md` e diferencie sempre capa
 ## Validação
 
 Execute `npm test` e `npm run build` para mudanças relevantes. Documente o que foi realmente executado e riscos remanescentes.
+
+## Identidade RPA Automatic
+
+Use os três assets aprovados sem redesenhar: `rpa-automatic-primary.png` no topo, `rpa-automatic-icon.png` no chat/assistência/monitoramento existente e `rpa-automatic-horizontal.png` no rodapé, com “© ANO RPA Automatic. Todos os direitos reservados.”. Preserve fundo branco e proporções. O manifesto da marca acompanha os assets; nunca substitua por imagens de clientes.

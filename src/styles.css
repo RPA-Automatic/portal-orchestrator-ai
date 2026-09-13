@@ -4,3 +4,19 @@
 @media(max-width:1150px){.sidebar{width:215px;padding:25px 13px}.sidebar .brand{font-size:16px}.main-shell{margin-left:215px;width:calc(100% - 215px)}main{padding:25px 23px}.main-shell>header{padding:0 23px}.dashboard-grid{grid-template-columns:1fr}.team-panel{display:none}.metrics{gap:10px}.metrics .panel{padding:16px}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}.auth-brand{padding:40px}.auth-form{padding:40px}}
 @media(max-width:760px){.sidebar{transform:translateX(-100%);width:248px;transition:transform .2s}.sidebar.open{transform:translateX(0)}.sidebar-scrim{position:fixed;inset:0;background:#0008;z-index:39;border:0;border-radius:0}.main-shell{margin:0;width:100%}.mobile-toggle{display:inline-flex;padding:3px;background:none;border:0}.breadcrumbs>span{display:none}.main-shell>header{padding:0 16px;height:62px}.search{display:none}main{padding:25px 16px}.page-heading{align-items:flex-start}.page-heading h1{font-size:25px}.page-heading .environment{display:none}.metrics{grid-template-columns:1fr 1fr}.metrics small{font-size:11px}.metric-number{font-size:29px}.panel{padding:18px}.composer-options{grid-template-columns:1fr}.composer-options label,.composer-options select{font-size:14px}.composer-bottom{flex-wrap:wrap}.composer-bottom button{width:100%}.catalog-grid{grid-template-columns:1fr}.view-toolbar{align-items:flex-start;flex-direction:column}.status{font-size:12px}.main-shell>footer{margin:0 16px 20px;gap:12px;flex-wrap:wrap}.auth-page{display:block}.auth-brand{min-height:unset;padding:28px;border-right:0;border-bottom:1px solid var(--border)}.auth-brand>div:nth-child(2),.auth-brand>small{display:none}.auth-form{padding:40px 28px}.auth-form h2{font-size:26px}.toast{right:16px;bottom:16px}.integration-line{flex-wrap:wrap}table{min-width:560px}.resource-top{margin-bottom:15px}input,textarea,select{font-size:16px}.team-panel{display:block}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Marca RPA Automatic: completa no topo, robô na assistência, horizontal no rodapé. */
+.brand-primary{display:block;width:88px;height:88px;object-fit:contain;background:#fff;border-radius:10px;flex-shrink:0}
+.top-brand{display:flex;align-items:center;gap:20px;min-width:0}
+.main-shell>header{height:112px}
+.assistant-avatar{display:block;width:38px;height:38px;object-fit:contain;background:#fff;border-radius:10px;flex-shrink:0}
+.assistant-heading{display:flex;align-items:center;gap:12px}
+.auth-brand .brand{white-space:normal;flex-direction:column;align-items:flex-start;gap:16px}
+.auth-brand .brand-primary{width:168px;height:168px}
+.auth-page{grid-template-rows:1fr auto}
+.auth-brand{min-height:0}
+.brand-footer,.main-shell>.brand-footer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;margin:0;border-top:1px solid #e4eaf2;background:#fff;text-align:center}
+.brand-footer img{display:block;width:230px;height:auto;max-width:100%}
+.brand-footer small{font-size:11px;color:#123B82;line-height:1.6}
+.auth-page>.brand-footer{grid-column:1/-1}
+@media(max-width:760px){.main-shell>header{height:96px}.top-brand{gap:10px}.brand-primary{width:72px;height:72px}.breadcrumbs{gap:5px}.breadcrumbs strong{font-size:11px}.header-actions{gap:4px}.auth-brand .brand{flex-direction:row;align-items:center}.auth-brand .brand-primary{width:100px;height:100px}.brand-footer img{width:208px}.brand-footer small{font-size:10px}}

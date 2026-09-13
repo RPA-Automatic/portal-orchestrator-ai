@@ -10,6 +10,8 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 ## Governança e produto
 
+- [Identidade visual RPA Automatic](product/brand.md)
+
 - [Padrão documental](governance/documentation-standard.md)
 - [Especificação do produto](product/product-spec.md)
 - [Catálogo de agentes](product/agent-catalog.md)
