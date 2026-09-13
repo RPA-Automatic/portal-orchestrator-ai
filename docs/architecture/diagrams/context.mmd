@@ -1,0 +1,8 @@
+flowchart LR
+    Builder[Builder/operador] --> Portal[Portal Orchestrator AI]
+    Reviewer[Revisor] --> Portal
+    Portal --> Supabase[Supabase control plane]
+    Supabase --> OpenAI[OpenAI adapter]
+    Supabase --> GitHub[GitHub leitura]
+    Supabase -. planejado .-> Workers[Workers e adapters]
+    Workers -. planejado .-> External[Agentes, RPA, APIs e MCP]

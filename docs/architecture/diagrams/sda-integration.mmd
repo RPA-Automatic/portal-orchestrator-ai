@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor User as Usuário autorizado
+    participant Portal as Portal Orchestrator
+    participant Adapter as SDA adapter planejado
+    participant SDA as Solution Design Architecture Agent
+    User->>Portal: Aprovar solicitação
+    Portal-->>Adapter: job + correlation + idempotency
+    Adapter-->>SDA: Submeter referência autenticada
+    SDA-->>Adapter: accepted + external_id
+    loop Reconciliação planejada
+        Adapter-->>SDA: Consultar status
+        SDA-->>Adapter: estado e artefatos por referência
+    end
+    Adapter-->>Portal: resultado auditável
+    Note over Portal,SDA: Integração não implementada
