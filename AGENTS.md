@@ -19,4 +19,4 @@ Execute `npm test` e `npm run build` para mudanças relevantes. Documente o que 
 
 ## Identidade RPA Automatic
 
-Use os três assets aprovados sem redesenhar: `rpa-automatic-primary.png` no topo, `rpa-automatic-icon.png` no chat/assistência/monitoramento existente e `rpa-automatic-horizontal.png` no rodapé, com “© ANO RPA Automatic. Todos os direitos reservados.”. Preserve fundo branco e proporções. O manifesto da marca acompanha os assets; nunca substitua por imagens de clientes.
+Use os três assets aprovados sem redesenhar: `rpa-automatic-primary.png` no login, `rpa-automatic-icon.png` no chat/assistência/monitoramento existente e `rpa-automatic-horizontal.png` no cabeçalho do workspace e no rodapé, com “© ANO RPA Automatic. Todos os direitos reservados.”. O cabeçalho usa a versão horizontal por solicitação do proprietário em 2026-09-13. Preserve fundo branco e proporções. O manifesto da marca acompanha os assets; nunca substitua por imagens de clientes. Use azul como destaque, com degradês discretos e suporte a tema claro/escuro/automático.

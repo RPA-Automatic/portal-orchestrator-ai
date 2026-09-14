@@ -1,31 +1,890 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import type { Session } from '@supabase/supabase-js';
-import { Activity, ArrowUpRight, Bell, BookOpen, Bot, Brain, ChevronRight, FileText, GitBranch, LayoutDashboard, LogOut, Menu, Network, Play, Plug, RefreshCw, Search, Settings, ShieldCheck, Sparkles, Terminal, Workflow, X } from 'lucide-react';
-import { supabase, invoke } from './lib/supabase';
-import { sections, type Section, type Run, type Resource, type ResourceKind, type Memory, type Event, type Health } from './lib/types';
-import { Auth } from './components/Auth';
-import { BrandTop, BrandFooter, AssistantIcon } from './components/Brand';
-import { Panel, Empty, Status, formatDate } from './components/shared';
-import { Catalog } from './components/Catalog';
-import { MemoryView } from './components/MemoryView';
-import { RunDetail } from './components/RunDetail';
-import { Integrations } from './components/Integrations';
-import { CodeAssist } from './components/CodeAssist';
-const icons=[LayoutDashboard,Terminal,Bot,Workflow,Sparkles,FileText,Brain,GitBranch,Plug,ShieldCheck,Settings];
-const kindFor:Partial<Record<Section,ResourceKind>>={'Agentes':'agent','Fluxos':'workflow','Skills':'skill','Instruções':'instruction'};
-export default function App(){const [session,setSession]=useState<Session|null>(null);const [ready,setReady]=useState(false);useEffect(()=>{void supabase.auth.getSession().then(({data})=>{setSession(data.session);setReady(true)});const {data}=supabase.auth.onAuthStateChange((_,s)=>{setSession(s);setReady(true)});return()=>data.subscription.unsubscribe()},[]);if(!ready)return <div className="loading">Carregando workspace…</div>;return session?<Workspace key={session.user.id} session={session}/>:<Auth/>}
-function Workspace({session}:{session:Session}){
- const [section,setSection]=useState<Section>('Visão geral');const [mobile,setMobile]=useState(false);const [query,setQuery]=useState('');const [runs,setRuns]=useState<Run[]>([]);const [resources,setResources]=useState<Resource[]>([]);const [memory,setMemory]=useState<Memory[]>([]);const [events,setEvents]=useState<Event[]>([]);const [workspace,setWorkspace]=useState('');const [health,setHealth]=useState<Health|null>(null);const [selected,setSelected]=useState<string|null>(null);const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [loading,setLoading]=useState(true);const [prompt,setPrompt]=useState('');const [workflow,setWorkflow]=useState('engineering');const [customWorkflow,setCustomWorkflow]=useState('');const [mode,setMode]=useState<'demo'|'openai'>('demo');const [filter,setFilter]=useState('all');const active=useRef(false);
- const notify=useCallback((s:string)=>setMessage(s),[]);
- const refresh=useCallback(async()=>{const results=await Promise.all([supabase.from('ao_runs').select('*').order('created_at',{ascending:false}).limit(100),supabase.from('ao_resources').select('*').order('created_at'),supabase.from('ao_memory').select('*').order('created_at',{ascending:false}).limit(100),supabase.from('ao_events').select('*').order('created_at',{ascending:false}).limit(200)]);for(const r of results)if(r.error)throw r.error;setRuns(results[0].data as Run[]);setResources(results[1].data as Resource[]);setMemory(results[2].data as Memory[]);setEvents(results[3].data as Event[])},[]);
- const refreshHealth=useCallback(async()=>setHealth(await invoke<Health>({action:'health'})),[]);
- useEffect(()=>{let live=true;(async()=>{try{const {data,error}=await supabase.from('ao_workspaces').select('id').eq('owner_id',session.user.id).maybeSingle();if(error)throw error;let id=data?.id;if(!id){const created=await supabase.from('ao_workspaces').insert({owner_id:session.user.id,name:'Meu workspace'}).select('id').single();if(created.error){const retry=await supabase.from('ao_workspaces').select('id').eq('owner_id',session.user.id).single();if(retry.error)throw retry.error;id=retry.data.id}else id=created.data.id}await invoke({action:'bootstrap'});if(live)setWorkspace(id!);await Promise.all([refresh(),refreshHealth()]);}catch(err){notify((err as Error).message)}finally{if(live)setLoading(false)}})();return()=>{live=false}},[session.user.id,refresh,refreshHealth,notify]);
- useEffect(()=>{if(!workspace)return;const timer=setInterval(()=>{void refresh().catch(err=>notify(err.message))},10000);return()=>clearInterval(timer)},[workspace,refresh,notify]);
- async function advance(initial:Run){if(active.current)return;active.current=true;setBusy(true);let run=initial;try{while(run.status==='queued'){const result=await invoke<{run:Run}>({action:'advance',id:run.id});run=result.run;await refresh()}notify(run.status==='waiting_approval'?'Entrega pronta para sua revisão.':'Execução atualizada.')}catch(err){notify((err as Error).message);await refresh().catch(()=>{})}finally{active.current=false;setBusy(false)}}
- async function create(e:FormEvent){e.preventDefault();if(busy)return;setBusy(true);try{const result=await invoke<{run:Run}>({action:'create',id:crypto.randomUUID(),workspace_id:workspace,prompt,workflow,workflow_id:customWorkflow||undefined,mode});setSelected(result.run.id);await refresh();await advance(result.run)}catch(err){notify((err as Error).message)}finally{setBusy(false)}}
- const current=runs.find(r=>r.id===selected)||runs[0];const pending=runs.filter(r=>r.status==='waiting_approval');const filtered=runs.filter(r=>(filter==='all'||r.status===filter)&&`${r.title} ${r.id}`.toLowerCase().includes(query.toLowerCase()));const agents=resources.filter(r=>r.kind==='agent');
- function navigate(s:Section){setSection(s);setMobile(false);setQuery('')}
- const list=<Panel title="Execuções" action={<span className="muted">{filtered.length} registros</span>}>{filtered.length?<div className="table-scroll"><table><thead><tr><th>Tarefa</th><th>Status</th><th>Modo</th><th>Criada em</th><th/></tr></thead><tbody>{filtered.map(r=><tr key={r.id} className={current?.id===r.id?'selected':''}><td><button className="run-link" onClick={()=>{setSelected(r.id);setSection('Tarefas')}}><span className="run-glyph"><Workflow size={17}/></span><span>{r.title}<small>{r.id.slice(0,8)}</small></span></button></td><td><Status value={r.status}/></td><td>{r.mode==='demo'?'Demo':'IA'}</td><td>{formatDate(r.created_at)}</td><td><button aria-label="Abrir execução" onClick={()=>{setSelected(r.id);setSection('Tarefas')}}><ChevronRight size={16}/></button></td></tr>)}</tbody></table></div>:<Empty title="Nenhuma execução encontrada" detail="Descreva um objetivo para iniciar seu primeiro fluxo."/>}</Panel>;
- const composer=<Panel title={<span className="assistant-heading"><AssistantIcon label="Assistente de tarefas"/>O que vamos construir?</span>} action={<span className="status"><Sparkles size={12}/>Nova tarefa</span>}><form onSubmit={create}><textarea aria-label="Objetivo da tarefa" placeholder="Descreva uma aplicação, automação, revisão de código ou documento que deseja criar…" value={prompt} onChange={e=>setPrompt(e.target.value)} minLength={12} maxLength={8000} rows={5} required/><div className="composer-options"><label>Área<select value={workflow} onChange={e=>setWorkflow(e.target.value)}><option value="engineering">Engenharia de software</option><option value="rpa">RPA e automação</option><option value="agro">Processos de negócio</option></select></label><label>Fluxo<select value={customWorkflow} onChange={e=>setCustomWorkflow(e.target.value)}><option value="">Planejar → criar → revisar</option>{resources.filter(r=>r.kind==='workflow').map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><label>Execução<select value={mode} onChange={e=>setMode(e.target.value as 'demo'|'openai')}><option value="demo">Demonstração (sem IA)</option><option value="openai" disabled={!health?.openai}>IA · {health?.openai?'OpenAI':'configure a credencial'}</option></select></label></div><div className="composer-bottom"><small><ShieldCheck size={14}/>Entrega sujeita à revisão humana</small><button className="primary" disabled={busy||!workspace}><Play size={16}/>{busy?'Processando…':'Iniciar execução'}</button></div></form></Panel>;
- return <div className="app-shell"><a className="skip-link" href="#main">Pular para o conteúdo</a>{mobile&&<button className="sidebar-scrim" aria-label="Fechar menu" onClick={()=>setMobile(false)}/>}<aside className={`sidebar ${mobile?'open':''}`}><div className="brand"><span>Orchestrator <b>AI</b><small>RPA AUTOMATIC</small></span></div><div className="workspace-picker"><span className="workspace-avatar">RF</span><div>Meu workspace<small>Ambiente de desenvolvimento</small></div></div><div className="nav-label">WORKSPACE</div><nav>{sections.map((s,i)=>{const Icon=icons[i];return <button key={s} className={section===s?'active':''} onClick={()=>navigate(s)}><Icon size={18}/>{s}{s==='Agentes'&&<span>{agents.length}</span>}{s==='Tarefas'&&pending.length>0&&<span>{pending.length}</span>}</button>})}</nav><div className="sidebar-bottom"><div className="safe-box"><ShieldCheck size={19}/><div>Você no controle<small>Revisão antes da entrega</small></div></div><button className="profile" onClick={()=>void supabase.auth.signOut()} title="Sair da conta"><span className="workspace-avatar">{session.user.email?.slice(0,2).toUpperCase()}</span><span>{session.user.email}<small>Sair da conta</small></span><LogOut size={16}/></button></div></aside><div className="main-shell"><header><div className="top-brand"><BrandTop/><div className="breadcrumbs"><button className="mobile-toggle" aria-label="Abrir menu" onClick={()=>setMobile(true)}><Menu/></button><span>Workspace</span><ChevronRight size={14}/><strong>{section}</strong></div></div><div className="header-actions"><label className="search"><Search size={16}/><input aria-label="Pesquisar tarefas" placeholder="Pesquisar tarefas…" value={query} onChange={e=>{setQuery(e.target.value);setSection('Tarefas')}}/></label><button aria-label="Atualizar dados" onClick={()=>void refresh().catch(err=>notify(err.message))}><RefreshCw size={17}/></button><button aria-label="Aprovações pendentes" onClick={()=>{setFilter('waiting_approval');setSection('Tarefas')}}><Bell size={18}/>{pending.length>0&&<span className="notification-dot"/>}</button></div></header><main id="main"><div className="page-heading"><div><span className="eyebrow">CENTRAL DE ORQUESTRAÇÃO</span><h1>{section==='Visão geral'?'Seu trabalho, em movimento.':section}</h1><p>{section==='Visão geral'?'Transforme objetivos em entregas com agentes, contexto e revisão.':'Gerencie seu workspace e acompanhe os resultados.'}</p></div><span className="environment"><GitBranch size={14}/>dev <span>/</span> Portal AI</span></div>{loading?<Panel><Empty title="Preparando seu workspace…"/></Panel>:<>{section==='Visão geral'&&<><div className="metrics">{[{label:'Execuções',value:runs.length,icon:Activity,detail:'Últimas 100 tarefas'},{label:'Em revisão',value:pending.length,icon:ShieldCheck,detail:'Aguardando sua decisão'},{label:'Agentes',value:agents.length,icon:Bot,detail:'Disponíveis no workspace'},{label:'Memórias',value:memory.length,icon:Brain,detail:'Contexto para suas tarefas'}].map(({label,value,icon:Icon,detail})=><Panel key={label}><div className="metric-title">{label}<Icon size={18}/></div><strong className="metric-number">{value.toString().padStart(2,'0')}</strong><small>{detail}</small></Panel>)}</div><div className="dashboard-grid">{composer}<Panel title="Seu time de agentes" className="team-panel"><div className="team-caption"><Network size={16}/>Planejamento, criação e revisão</div>{agents.slice(0,4).map((a,i)=><div className="team-agent" key={a.id}><span className={`agent-icon color-${i}`}><Bot size={19}/></span><div><strong>{a.name}</strong><small>{String(a.config.role||'Agente personalizado')}</small></div><ArrowUpRight size={16}/></div>)}<button className="text-button" onClick={()=>navigate('Agentes')}>Gerenciar agentes <ChevronRight size={16}/></button></Panel></div>{list}</>}{section==='Tarefas'&&<><div className="filter-row">{[['all','Todas'],['queued','Na fila'],['running','Executando'],['waiting_approval','Em revisão'],['completed','Concluídas'],['failed','Falhas']].map(([v,l])=><button key={v} className={filter===v?'active':''} onClick={()=>setFilter(v)}>{l}</button>)}</div><div className="split">{composer}{current?<RunDetail run={current} busy={busy} onAdvance={advance} onChange={refresh} notify={notify}/>:<Panel><Empty title="Sua próxima entrega começa aqui"/></Panel>}</div>{list}</>}{kindFor[section]&&<Catalog kind={kindFor[section]!} resources={resources} owner={session.user.id} refresh={refresh} notify={notify}/>} {section==='Memória'&&<MemoryView items={memory} owner={session.user.id} workspace={workspace} refresh={refresh} notify={notify}/>} {section==='Code Assist'&&<CodeAssist notify={notify} onUse={s=>{setPrompt(s);navigate('Tarefas')}}/>}{section==='Integrações'&&<><Integrations health={health} refresh={refreshHealth} notify={notify}/><h2 className="section-title">Servidores MCP</h2><Catalog kind="mcp" resources={resources} owner={session.user.id} refresh={refresh} notify={notify}/></>}{section==='Auditoria'&&<Panel title={<span className="assistant-heading"><AssistantIcon label="Monitoramento de execuções"/>Histórico de estados</span>}>{events.length?<div className="table-scroll"><table><thead><tr><th>Evento</th><th>Execução</th><th>Data</th></tr></thead><tbody>{events.map(e=><tr key={e.id}><td><Status value={e.action}/></td><td><button onClick={()=>{setSelected(e.run_id);navigate('Tarefas')}}>{e.run_id.slice(0,8)}</button></td><td>{formatDate(e.created_at)}</td></tr>)}</tbody></table></div>:<Empty title="Nenhum evento registrado" detail="As mudanças de estado das execuções aparecem aqui."/>}</Panel>}{section==='Configurações'&&<><Panel title="Workspace"><p className="integration-line"><span>Conta</span><strong>{session.user.email}</strong></p><p className="integration-line"><span>Isolamento</span><span>Dados por proprietário · RLS</span></p><p className="integration-line"><span>Execução</span><span>Até 30 tarefas/dia · 1 ativa por conta</span></p></Panel><h2 className="section-title">Projetos</h2><Catalog kind="project" resources={resources} owner={session.user.id} refresh={refresh} notify={notify}/></>}</>}</main><BrandFooter/></div>{message&&<div className="toast" role="status"><BookOpen size={18}/><p>{message}</p><button aria-label="Fechar aviso" onClick={()=>setMessage('')}><X size={16}/></button></div>}</div>
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import type { Session } from "@supabase/supabase-js";
+import {
+  Activity,
+  ArrowUpRight,
+  Bell,
+  BookOpen,
+  Bot,
+  Brain,
+  ChevronRight,
+  FileText,
+  GitBranch,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Network,
+  Play,
+  Plug,
+  RefreshCw,
+  Search,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  Workflow,
+  X,
+} from "lucide-react";
+import { supabase, invoke } from "./lib/supabase";
+import {
+  sections,
+  type Section,
+  type Run,
+  type Resource,
+  type ResourceKind,
+  type Memory,
+  type Event,
+  type Health,
+} from "./lib/types";
+import { Auth } from "./components/Auth";
+import { BrandTop, BrandFooter, AssistantIcon } from "./components/Brand";
+import { Panel, Empty, Status, formatDate } from "./components/shared";
+const Catalog = lazy(() =>
+  import("./components/Catalog").then((m) => ({ default: m.Catalog })),
+);
+const MemoryView = lazy(() =>
+  import("./components/MemoryView").then((m) => ({ default: m.MemoryView })),
+);
+const RunDetail = lazy(() =>
+  import("./components/RunDetail").then((m) => ({ default: m.RunDetail })),
+);
+const Integrations = lazy(() =>
+  import("./components/Integrations").then((m) => ({
+    default: m.Integrations,
+  })),
+);
+const CodeAssist = lazy(() =>
+  import("./components/CodeAssist").then((m) => ({ default: m.CodeAssist })),
+);
+import { ThemeSwitcher } from "./components/ThemeProvider";
+import { Button } from "./components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "./components/ui/dialog";
+const icons = [
+  LayoutDashboard,
+  Terminal,
+  Bot,
+  Workflow,
+  Sparkles,
+  FileText,
+  Brain,
+  GitBranch,
+  Plug,
+  ShieldCheck,
+  Settings,
+];
+const kindFor: Partial<Record<Section, ResourceKind>> = {
+  Agentes: "agent",
+  Fluxos: "workflow",
+  Skills: "skill",
+  Instruções: "instruction",
+};
+export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setReady(true);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_, s) => {
+      setSession(s);
+      setReady(true);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+  if (!ready) return <div className="loading">Carregando workspace…</div>;
+  return session ? (
+    <Workspace key={session.user.id} session={session} />
+  ) : (
+    <Auth />
+  );
+}
+function Workspace({ session }: { session: Session }) {
+  const [section, setSection] = useState<Section>("Visão geral");
+  const [mobile, setMobile] = useState(false);
+  const [query, setQuery] = useState("");
+  const [runs, setRuns] = useState<Run[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [memory, setMemory] = useState<Memory[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [workspace, setWorkspace] = useState("");
+  const [health, setHealth] = useState<Health | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [prompt, setPrompt] = useState("");
+  const [workflow, setWorkflow] = useState("engineering");
+  const [customWorkflow, setCustomWorkflow] = useState("");
+  const [mode, setMode] = useState<"demo" | "openai">("demo");
+  const [filter, setFilter] = useState("all");
+  const active = useRef(false);
+  const notify = useCallback((s: string) => setMessage(s), []);
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobile(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+  const refresh = useCallback(async () => {
+    const results = await Promise.all([
+      supabase
+        .from("ao_runs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase.from("ao_resources").select("*").order("created_at"),
+      supabase
+        .from("ao_memory")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase
+        .from("ao_events")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200),
+    ]);
+    for (const r of results) if (r.error) throw r.error;
+    setRuns(results[0].data as Run[]);
+    setResources(results[1].data as Resource[]);
+    setMemory(results[2].data as Memory[]);
+    setEvents(results[3].data as Event[]);
+  }, []);
+  const refreshHealth = useCallback(
+    async () => setHealth(await invoke<Health>({ action: "health" })),
+    [],
+  );
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("ao_workspaces")
+          .select("id")
+          .eq("owner_id", session.user.id)
+          .maybeSingle();
+        if (error) throw error;
+        let id = data?.id;
+        if (!id) {
+          const created = await supabase
+            .from("ao_workspaces")
+            .insert({ owner_id: session.user.id, name: "Meu workspace" })
+            .select("id")
+            .single();
+          if (created.error) {
+            const retry = await supabase
+              .from("ao_workspaces")
+              .select("id")
+              .eq("owner_id", session.user.id)
+              .single();
+            if (retry.error) throw retry.error;
+            id = retry.data.id;
+          } else id = created.data.id;
+        }
+        await invoke({ action: "bootstrap" });
+        if (live) setWorkspace(id!);
+        await Promise.all([refresh(), refreshHealth()]);
+      } catch (err) {
+        notify((err as Error).message);
+      } finally {
+        if (live) setLoading(false);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [session.user.id, refresh, refreshHealth, notify]);
+  useEffect(() => {
+    if (!workspace) return;
+    const timer = setInterval(() => {
+      void refresh().catch((err) => notify(err.message));
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [workspace, refresh, notify]);
+  async function advance(initial: Run) {
+    if (active.current) return;
+    active.current = true;
+    setBusy(true);
+    let run = initial;
+    try {
+      while (run.status === "queued") {
+        const result = await invoke<{ run: Run }>({
+          action: "advance",
+          id: run.id,
+        });
+        run = result.run;
+        await refresh();
+      }
+      notify(
+        run.status === "waiting_approval"
+          ? "Entrega pronta para sua revisão."
+          : "Execução atualizada.",
+      );
+    } catch (err) {
+      notify((err as Error).message);
+      await refresh().catch(() => {});
+    } finally {
+      active.current = false;
+      setBusy(false);
+    }
+  }
+  async function create(e: FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await invoke<{ run: Run }>({
+        action: "create",
+        id: crypto.randomUUID(),
+        workspace_id: workspace,
+        prompt,
+        workflow,
+        workflow_id: customWorkflow || undefined,
+        mode,
+      });
+      setSelected(result.run.id);
+      await refresh();
+      await advance(result.run);
+    } catch (err) {
+      notify((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const current = runs.find((r) => r.id === selected) || runs[0];
+  const pending = runs.filter((r) => r.status === "waiting_approval");
+  const filtered = runs.filter(
+    (r) =>
+      (filter === "all" || r.status === filter) &&
+      `${r.title} ${r.id}`.toLowerCase().includes(query.toLowerCase()),
+  );
+  const agents = resources.filter((r) => r.kind === "agent");
+  function navigate(s: Section) {
+    setSection(s);
+    setMobile(false);
+    setQuery("");
+  }
+  const list = (
+    <Panel
+      title="Execuções"
+      action={<span className="muted">{filtered.length} registros</span>}
+    >
+      {filtered.length ? (
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Status</th>
+                <th>Modo</th>
+                <th>Criada em</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r) => (
+                <tr
+                  key={r.id}
+                  className={current?.id === r.id ? "selected" : ""}
+                >
+                  <td>
+                    <button
+                      className="run-link"
+                      onClick={() => {
+                        setSelected(r.id);
+                        setSection("Tarefas");
+                      }}
+                    >
+                      <span className="run-glyph">
+                        <Workflow size={17} />
+                      </span>
+                      <span>
+                        {r.title}
+                        <small>{r.id.slice(0, 8)}</small>
+                      </span>
+                    </button>
+                  </td>
+                  <td>
+                    <Status value={r.status} />
+                  </td>
+                  <td>{r.mode === "demo" ? "Demo" : "IA"}</td>
+                  <td>{formatDate(r.created_at)}</td>
+                  <td>
+                    <button
+                      aria-label="Abrir execução"
+                      onClick={() => {
+                        setSelected(r.id);
+                        setSection("Tarefas");
+                      }}
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <Empty
+          title="Nenhuma execução encontrada"
+          detail="Descreva um objetivo para iniciar seu primeiro fluxo."
+        />
+      )}
+    </Panel>
+  );
+  const composer = (
+    <Panel
+      className="composer-panel"
+      title={
+        <span className="assistant-heading">
+          <AssistantIcon label="Assistente de tarefas" />O que vamos construir?
+        </span>
+      }
+      action={
+        <span className="status">
+          <Sparkles size={12} />
+          Nova tarefa
+        </span>
+      }
+    >
+      <form onSubmit={create}>
+        <textarea
+          aria-label="Objetivo da tarefa"
+          placeholder="Descreva uma aplicação, automação, revisão de código ou documento que deseja criar…"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          minLength={12}
+          maxLength={8000}
+          rows={4}
+          required
+        />
+        <div className="prompt-suggestions" aria-label="Sugestões de objetivo">
+          <span>Comece por aqui</span>
+          {[
+            [
+              "Automatizar um processo",
+              "rpa",
+              "Quero automatizar um processo. Ajude-me a mapear as etapas, regras de negócio, exceções e integrações necessárias.",
+            ],
+            [
+              "Desenhar uma solução",
+              "engineering",
+              "Ajude-me a desenhar uma solução técnica, detalhando requisitos, componentes, integrações, riscos e critérios de aceite.",
+            ],
+          ].map(([label, area, text]) => (
+            <button
+              type="button"
+              key={label}
+              disabled={busy}
+              onClick={() => {
+                setPrompt(text);
+                setWorkflow(area);
+              }}
+            >
+              <Sparkles size={12} />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="composer-options">
+          <label>
+            Área
+            <select
+              value={workflow}
+              onChange={(e) => setWorkflow(e.target.value)}
+            >
+              <option value="engineering">Engenharia de software</option>
+              <option value="rpa">RPA e automação</option>
+              <option value="agro">Processos de negócio</option>
+            </select>
+          </label>
+          <label>
+            Fluxo
+            <select
+              value={customWorkflow}
+              onChange={(e) => setCustomWorkflow(e.target.value)}
+            >
+              <option value="">Planejar → criar → revisar</option>
+              {resources
+                .filter((r) => r.kind === "workflow")
+                .map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label>
+            Execução
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as "demo" | "openai")}
+            >
+              <option value="demo">Demonstração (sem IA)</option>
+              <option value="openai" disabled={!health?.openai}>
+                IA · {health?.openai ? "OpenAI" : "configure a credencial"}
+              </option>
+            </select>
+          </label>
+        </div>
+        <div className="composer-bottom">
+          <small>
+            <ShieldCheck size={14} />
+            Entrega sujeita à revisão humana
+          </small>
+          <Button className="primary" disabled={busy || !workspace}>
+            <Play size={16} />
+            {busy ? "Processando…" : "Iniciar execução"}
+          </Button>
+        </div>
+      </form>
+    </Panel>
+  );
+  const sidebar = (
+    <>
+      <div className="brand">
+        <span>
+          Orchestrator <b>AI</b>
+          <small>RPA AUTOMATIC</small>
+        </span>
+      </div>
+      <div className="workspace-picker">
+        <span className="workspace-avatar">
+          {session.user.email?.slice(0, 2).toUpperCase() || "WS"}
+        </span>
+        <div>
+          Meu workspace<small>Seu espaço de trabalho</small>
+        </div>
+      </div>
+      <div className="nav-label">WORKSPACE</div>
+      <nav aria-label="Navegação principal">
+        {sections.map((s, i) => {
+          const Icon = icons[i];
+          return (
+            <button
+              key={s}
+              className={section === s ? "active" : ""}
+              aria-current={section === s ? "page" : undefined}
+              onClick={() => navigate(s)}
+            >
+              <Icon size={18} />
+              {s}
+              {s === "Agentes" && <span>{agents.length}</span>}
+              {s === "Tarefas" && pending.length > 0 && (
+                <span>{pending.length}</span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+      <div className="sidebar-bottom">
+        <div className="safe-box">
+          <ShieldCheck size={19} />
+          <div>
+            Você no controle<small>Revisão antes da entrega</small>
+          </div>
+        </div>
+        <button
+          className="profile"
+          onClick={() => void supabase.auth.signOut()}
+          title="Sair da conta"
+        >
+          <span className="workspace-avatar">
+            {session.user.email?.slice(0, 2).toUpperCase()}
+          </span>
+          <span>
+            {session.user.email}
+            <small>Sair da conta</small>
+          </span>
+          <LogOut size={16} />
+        </button>
+      </div>
+    </>
+  );
+  return (
+    <div className="app-shell">
+      <a className="skip-link" href="#main">
+        Pular para o conteúdo
+      </a>
+      <aside className="sidebar desktop-sidebar">{sidebar}</aside>
+      <div className="main-shell">
+        <header>
+          <div className="top-brand">
+            <BrandTop horizontal />
+            <div className="breadcrumbs">
+              <Dialog open={mobile} onOpenChange={setMobile}>
+                <DialogTrigger asChild>
+                  <button className="mobile-toggle" aria-label="Abrir menu">
+                    <Menu />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sidebar mobile-sidebar">
+                  <DialogTitle className="sr-only">
+                    Navegação do workspace
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Acesse as áreas do portal.
+                  </DialogDescription>
+                  {sidebar}
+                </DialogContent>
+              </Dialog>
+              <span>Workspace</span>
+              <ChevronRight size={14} />
+              <strong>{section}</strong>
+            </div>
+          </div>
+          <div className="header-actions">
+            <ThemeSwitcher />
+            <label className="search">
+              <Search size={16} />
+              <input
+                aria-label="Pesquisar tarefas"
+                placeholder="Pesquisar tarefas…"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSection("Tarefas");
+                }}
+              />
+            </label>
+            <button
+              aria-label="Atualizar dados"
+              onClick={() => void refresh().catch((err) => notify(err.message))}
+            >
+              <RefreshCw size={17} />
+            </button>
+            <button
+              aria-label="Aprovações pendentes"
+              onClick={() => {
+                setFilter("waiting_approval");
+                setSection("Tarefas");
+              }}
+            >
+              <Bell size={18} />
+              {pending.length > 0 && <span className="notification-dot" />}
+            </button>
+          </div>
+        </header>
+        <main id="main" tabIndex={-1}>
+          <div
+            className={`page-heading ${section === "Visão geral" ? "overview-heading" : ""}`}
+          >
+            <div>
+              <span className="eyebrow">CENTRAL DE ORQUESTRAÇÃO</span>
+              <h1>
+                {section === "Visão geral"
+                  ? "Seu trabalho, em movimento."
+                  : section}
+              </h1>
+              <p>
+                {section === "Visão geral"
+                  ? "Transforme objetivos em entregas com agentes, contexto e revisão."
+                  : "Gerencie seu workspace e acompanhe os resultados."}
+              </p>
+            </div>
+            <div className="heading-aside">
+              <span className="environment">
+                <ShieldCheck size={14} />
+                Revisão humana em cada entrega
+              </span>
+              {section === "Visão geral" && (
+                <div className="workflow-path" aria-label="Fluxo de trabalho">
+                  <span>Planejar</span>
+                  <ChevronRight size={14} />
+                  <span>Criar</span>
+                  <ChevronRight size={14} />
+                  <span>Revisar</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <Suspense
+            fallback={
+              <Panel>
+                <Empty title="Carregando área do workspace…" />
+              </Panel>
+            }
+          >
+            {loading ? (
+              <Panel>
+                <Empty title="Preparando seu workspace…" />
+              </Panel>
+            ) : (
+              <>
+                {section === "Visão geral" && (
+                  <>
+                    <div className="metrics">
+                      {[
+                        {
+                          label: "Execuções",
+                          value: runs.length,
+                          icon: Activity,
+                          detail: "Últimas 100 tarefas",
+                        },
+                        {
+                          label: "Em revisão",
+                          value: pending.length,
+                          icon: ShieldCheck,
+                          detail: "Aguardando sua decisão",
+                        },
+                        {
+                          label: "Agentes",
+                          value: agents.length,
+                          icon: Bot,
+                          detail: "Disponíveis no workspace",
+                        },
+                        {
+                          label: "Memórias",
+                          value: memory.length,
+                          icon: Brain,
+                          detail: "Contexto para suas tarefas",
+                        },
+                      ].map(({ label, value, icon: Icon, detail }) => (
+                        <Panel key={label}>
+                          <div className="metric-title">
+                            {label}
+                            <Icon size={18} />
+                          </div>
+                          <strong className="metric-number">
+                            {value.toString().padStart(2, "0")}
+                          </strong>
+                          <small>{detail}</small>
+                        </Panel>
+                      ))}
+                    </div>
+                    <div className="dashboard-grid">
+                      {composer}
+                      <Panel title="Seu time de agentes" className="team-panel">
+                        <div className="team-caption">
+                          <Network size={16} />
+                          Planejamento, criação e revisão
+                        </div>
+                        {agents.slice(0, 4).map((a, i) => (
+                          <button
+                            className="team-agent"
+                            key={a.id}
+                            onClick={() => navigate("Agentes")}
+                            aria-label={`Ver agente ${a.name}`}
+                          >
+                            <span className={`agent-icon color-${i}`}>
+                              <Bot size={19} />
+                            </span>
+                            <div>
+                              <strong>{a.name}</strong>
+                              <small>
+                                {String(
+                                  a.config.role || "Agente personalizado",
+                                )}
+                              </small>
+                            </div>
+                            <ArrowUpRight size={16} />
+                          </button>
+                        ))}
+                        <button
+                          className="text-button"
+                          onClick={() => navigate("Agentes")}
+                        >
+                          Gerenciar agentes <ChevronRight size={16} />
+                        </button>
+                      </Panel>
+                    </div>
+                    {list}
+                  </>
+                )}
+                {section === "Tarefas" && (
+                  <>
+                    <div className="filter-row">
+                      {[
+                        ["all", "Todas"],
+                        ["queued", "Na fila"],
+                        ["running", "Executando"],
+                        ["waiting_approval", "Em revisão"],
+                        ["completed", "Concluídas"],
+                        ["failed", "Falhas"],
+                        ["rejected", "Rejeitadas"],
+                        ["cancelled", "Canceladas"],
+                      ].map(([v, l]) => (
+                        <button
+                          key={v}
+                          className={filter === v ? "active" : ""}
+                          aria-pressed={filter === v}
+                          onClick={() => setFilter(v)}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="split">
+                      {composer}
+                      {current ? (
+                        <RunDetail
+                          run={current}
+                          busy={busy}
+                          onAdvance={advance}
+                          onChange={refresh}
+                          notify={notify}
+                        />
+                      ) : (
+                        <Panel>
+                          <Empty title="Sua próxima entrega começa aqui" />
+                        </Panel>
+                      )}
+                    </div>
+                    {list}
+                  </>
+                )}
+                {kindFor[section] && (
+                  <Catalog
+                    kind={kindFor[section]!}
+                    resources={resources}
+                    owner={session.user.id}
+                    refresh={refresh}
+                    notify={notify}
+                  />
+                )}{" "}
+                {section === "Memória" && (
+                  <MemoryView
+                    items={memory}
+                    owner={session.user.id}
+                    workspace={workspace}
+                    refresh={refresh}
+                    notify={notify}
+                  />
+                )}{" "}
+                {section === "Code Assist" && (
+                  <CodeAssist
+                    notify={notify}
+                    onUse={(s) => {
+                      setPrompt(s);
+                      navigate("Tarefas");
+                    }}
+                  />
+                )}
+                {section === "Integrações" && (
+                  <>
+                    <Integrations
+                      health={health}
+                      refresh={refreshHealth}
+                      notify={notify}
+                    />
+                    <h2 className="section-title">Servidores MCP</h2>
+                    <Catalog
+                      kind="mcp"
+                      resources={resources}
+                      owner={session.user.id}
+                      refresh={refresh}
+                      notify={notify}
+                    />
+                  </>
+                )}
+                {section === "Auditoria" && (
+                  <Panel
+                    title={
+                      <span className="assistant-heading">
+                        <AssistantIcon label="Monitoramento de execuções" />
+                        Histórico de estados
+                      </span>
+                    }
+                  >
+                    {events.length ? (
+                      <div className="table-scroll">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Evento</th>
+                              <th>Execução</th>
+                              <th>Data</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {events.map((e) => (
+                              <tr key={e.id}>
+                                <td>
+                                  <Status value={e.action} />
+                                </td>
+                                <td>
+                                  <button
+                                    onClick={() => {
+                                      setSelected(e.run_id);
+                                      navigate("Tarefas");
+                                    }}
+                                  >
+                                    {e.run_id.slice(0, 8)}
+                                  </button>
+                                </td>
+                                <td>{formatDate(e.created_at)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <Empty
+                        title="Nenhum evento registrado"
+                        detail="As mudanças de estado das execuções aparecem aqui."
+                      />
+                    )}
+                  </Panel>
+                )}
+                {section === "Configurações" && (
+                  <>
+                    <Panel title="Workspace">
+                      <p className="integration-line">
+                        <span>Conta</span>
+                        <strong>{session.user.email}</strong>
+                      </p>
+                      <p className="integration-line">
+                        <span>Isolamento</span>
+                        <span>Dados por proprietário · RLS</span>
+                      </p>
+                      <p className="integration-line">
+                        <span>Execução</span>
+                        <span>Até 30 tarefas/dia · 1 ativa por conta</span>
+                      </p>
+                    </Panel>
+                    <h2 className="section-title">Projetos</h2>
+                    <Catalog
+                      kind="project"
+                      resources={resources}
+                      owner={session.user.id}
+                      refresh={refresh}
+                      notify={notify}
+                    />
+                  </>
+                )}
+              </>
+            )}
+          </Suspense>
+        </main>
+        <BrandFooter />
+      </div>
+      {message && (
+        <div className="toast" role="status">
+          <BookOpen size={18} />
+          <p>{message}</p>
+          <button aria-label="Fechar aviso" onClick={() => setMessage("")}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }

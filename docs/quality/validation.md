@@ -27,6 +27,15 @@ Data: 09/09/2026.
 
 ## Limitações de validação
 
+### Revisão visual — 13/09/2026
+
+- Node 24.19.0: `npm test` aprovado (4 testes, incluindo 40 combinações de preferência/sistema/armazenamento no script de tema) e `npm run build` aprovado.
+- Navegador: login e dashboard nos temas claro/escuro; preferência preservada ao recarregar; sugestões preenchem objetivo e área; catálogo abre com dados existentes na fixture.
+- Diálogo: foco inicial no nome, Tab contido no modal, Escape fecha e restaura foco ao botão de edição. Navegação móvel abre e fecha ao selecionar uma área.
+- Revisão responsiva local, incluindo larguras de 320 px, 390 px e 768 px, sem overflow horizontal da página. Tabelas mantêm sua própria rolagem horizontal.
+- `tests/visual.html` e `tests/visual.ts` são uma fixture de desenvolvimento com sessão fictícia em memória e chamadas de API simuladas. Não são entradas de build nem recursos publicados em `dist/`; não validam operações reais no Supabase.
+- Assets PNG originais preservados. Cabeçalho horizontal, rodapé compacto e manifesto/kit da marca atualizados.
+
 Não foi concluído login com a conta do proprietário, execução paga de IA ou consulta GitHub através da credencial pessoal do portal. Esses testes dependem das credenciais cadastradas em Integrações. A navegação autenticada na conta UiPath encontrou a tela de login; a referência funcional veio da documentação pública, não de dados privados da conta.
 
 O verificador Supabase reportou proteção contra senhas vazadas desativada (configuração preexistente). O aviso informativo de RLS sem política no schema privado de credenciais é intencional: todo acesso de usuário é negado; somente o backend de serviço tem acesso. O CLI local não estava autenticado nesta revalidação; nenhuma migration ou Edge Function foi alterada remotamente.

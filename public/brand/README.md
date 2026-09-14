@@ -1,6 +1,7 @@
 # RPA Automatic — padrão de marca
 
-- **Topo:** `rpa-automatic-primary.png` — marca completa.
+- **Login:** `rpa-automatic-primary.png` — marca completa.
+- **Cabeçalho do workspace:** `rpa-automatic-horizontal.png` — proporcional à barra superior, conforme revisão aprovada pelo proprietário.
 - **Chat inteligente, assistência e monitoramento:** `rpa-automatic-icon.png` — robô.
 - **Rodapé:** `rpa-automatic-horizontal.png` — marca horizontal, acompanhada de “© ANO RPA Automatic. Todos os direitos reservados.”
 

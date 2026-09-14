@@ -4,8 +4,8 @@
   "background": "#FFFFFF",
   "roles": {
     "top": {
-      "file": "rpa-automatic-primary.png",
-      "sha256": "cc0b2b17384f37b85cef3830ab1225c43a7dc232628fed832ffab1dcb532918f"
+      "file": "rpa-automatic-horizontal.png",
+      "sha256": "694aacadd7eae89a7bfcaef1f4d9a82ab42fc0e71cb62d29d69393489165a891"
     },
     "assistant": {
       "file": "rpa-automatic-icon.png",
@@ -14,6 +14,10 @@
     "footer": {
       "file": "rpa-automatic-horizontal.png",
       "sha256": "694aacadd7eae89a7bfcaef1f4d9a82ab42fc0e71cb62d29d69393489165a891"
+    },
+    "login": {
+      "file": "rpa-automatic-primary.png",
+      "sha256": "cc0b2b17384f37b85cef3830ab1225c43a7dc232628fed832ffab1dcb532918f"
     }
   },
   "copyright": "RPA Automatic. Todos os direitos reservados."

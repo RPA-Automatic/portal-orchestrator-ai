@@ -17,6 +17,8 @@ O Portal Orchestrator AI coordena agentes, contexto, fluxos e aprovações em um
 ### Frontend
 
 - React 19, TypeScript e Vite, publicado na Netlify.
+- Tailwind CSS 4, Button/Dialog do shadcn/ui com Radix UI e ícones Lucide. Temas claro/escuro/automático e identidade azul documentados em [Identidade visual](../product/brand.md).
+- Áreas de catálogo, memória, execução, integrações e Code Assist carregadas sob demanda com React lazy/Suspense.
 - SPA em português com autenticação, catálogo, tarefas, memória, Code Assist, integrações e auditoria.
 - Polling periódico; não há assinatura Supabase Realtime ativa.
 
