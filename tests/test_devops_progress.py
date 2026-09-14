@@ -33,7 +33,7 @@ class DevOpsProgressTests(unittest.TestCase):
             self.fail("Não deveria escrever checkpoint duplicado")
 
         client = MODULE.Client(self.config(), auth="Bearer synthetic", transport=transport)
-        result = client.apply({"revision": 6, "marker": marker, "history": "history"})
+        result = client.apply({"revision": 5, "marker": marker, "history": "history"})
         self.assertEqual(result["result"], "unchanged")
         self.assertFalse(any(method == "PATCH" for method, _ in calls))
 

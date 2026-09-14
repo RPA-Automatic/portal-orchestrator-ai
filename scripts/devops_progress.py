@@ -119,12 +119,12 @@ class Client:
 
     def apply(self, plan):
         epic = self.epic()
-        if epic["rev"] != plan["revision"]:
-            raise DevOpsError("Conflito de revisão: releia o Épico e gere outro plano.")
         if any(plan["marker"] in str(update.get("fields", {}).get("System.History", {}))
                for update in self.updates()):
             return {"id": epic["id"], "revision": epic["rev"], "result": "unchanged",
                     "marker": plan["marker"]}
+        if epic["rev"] != plan["revision"]:
+            raise DevOpsError("Conflito de revisão: releia o Épico e gere outro plano.")
         patch = [
             {"op": "test", "path": "/rev", "value": plan["revision"]},
             {"op": "add", "path": "/fields/System.History", "value": plan["history"]},
