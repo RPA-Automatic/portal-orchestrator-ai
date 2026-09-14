@@ -5,3 +5,5 @@ dist/
 .netlify/
 *.tsbuildinfo
 supabase/.temp/
+.devops/
+__pycache__/

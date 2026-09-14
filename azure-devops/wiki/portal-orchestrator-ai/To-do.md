@@ -14,7 +14,10 @@ O cronograma de quatro sprints pertence ao Faturamento. O Orchestrator tem plane
 
 ## Próximas entregas
 
-- Corrigir ou desativar o alias `dev` da Netlify, que ainda aponta para outro produto.
+- Estruturar Features, Stories e Tasks filhas do Épico #87; hoje o Épico é o único card identificado para o produto.
+- Usar o checkpoint automático após cada incremento material validado, sem registrar simples conversas.
+
+- Corrigir ou desativar o alias `dev` da hospedagem, que foi verificado em 13/09/2026 apontando para outro produto. A produção principal está correta.
 - Validar separação do domínio fiscal e dos recursos de orquestração.
 - Evoluir cockpit e canvas com a identidade visual aprovada.
 - Implementar tenants, papéis e ambientes com autorização e testes.

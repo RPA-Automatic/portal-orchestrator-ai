@@ -34,6 +34,7 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 - [ADR-0001 — Separação dos portais](decisions/ADR-0001-separacao-dos-portais.md)
 - [Validação conhecida](quality/validation.md)
+- [Estado atual: exemplos, modelos, arquitetura e DevOps](quality/product-status-2026-09-13.md)
 - [Auditoria GitHub/Netlify/Supabase — 2026-09-13](quality/environment-audit-2026-09-13.md)
 
 ## Referências e histórico
@@ -45,5 +46,6 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 - [Wiki do produto](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_wiki/wikis/a872b434-77b1-4e65-ba18-923abf5021f1?pagePath=%2Fportal-orchestrator-ai)
 - [Épico #87](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_workitems/edit/87)
+- [Automação de checkpoints](../azure-devops/README.md)
 
 Cada produto mantém sua árvore de wiki e seu épico no projeto RPA Automatic. `docs/` permanece canônico; as fontes de publicação ficam em `azure-devops/wiki/portal-orchestrator-ai`.

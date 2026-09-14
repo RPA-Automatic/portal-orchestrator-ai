@@ -28,8 +28,9 @@ Este repositório não é o Portal Faturamento. Os produtos permanecem separados
 3. Segredos e operações privilegiadas ficam no backend; nunca em prompts, commits ou logs.
 4. Mudanças Supabase exigem migration versionada, revisão de RLS e validação em DEV.
 5. Efeitos externos exigem idempotência, auditoria, política de risco e aprovação quando aplicável.
-6. UiPath e outros orquestradores são referências públicas, não autorização para copiar APIs não documentadas.
+6. Apresente somente a identidade RPA Automatic nas experiências públicas; preserve nomes técnicos apenas onde integração, licença ou transparência exigirem precisão.
 7. Atualize SDD, catálogo e ADRs quando o contrato ou estado de uma capacidade mudar.
+8. Após uma entrega material comprovada, registre o checkpoint no Épico e sincronize a wiki conforme `.agents/skills/azure-devops-progress-sync/SKILL.md`.
 
 ## Conclusão
 

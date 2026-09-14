@@ -8,4 +8,5 @@ Use `docs/README.md` como índice e `AGENTS.md` como regra do projeto.
 - Mudanças Supabase exigem migration, RLS, validação de sessão no backend e teste de isolamento.
 - Segredos nunca entram no frontend, Git ou logs.
 - Atualize SDD, catálogo de agentes e ADRs quando contratos ou decisões mudarem.
+- Depois de uma entrega material validada, use a skill `azure-devops-progress-sync` para registrar o checkpoint e sincronizar a wiki; não crie histórico para simples conversa ou hipótese.
 - Valide com `npm test` e `npm run build` quando aplicável.

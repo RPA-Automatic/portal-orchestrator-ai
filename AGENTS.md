@@ -12,6 +12,7 @@ Trabalhe em português do Brasil. Leia `docs/README.md` e diferencie sempre capa
 - Efeitos externos exigem autenticação, autorização, idempotência, auditoria e aprovação conforme risco.
 - Portal Faturamento é outro produto; respeite `docs/decisions/ADR-0001-separacao-dos-portais.md`.
 - Atualize SDD, catálogo de agentes, contratos e ADRs quando seu estado mudar.
+- Após cada incremento material verificado, use `.agents/skills/azure-devops-progress-sync/SKILL.md` para registrar a entrega no Épico e sincronizar as páginas afetadas da wiki. Não registre simples conversas ou hipóteses.
 
 ## Validação
 

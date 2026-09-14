@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sincronizar progresso no DevOps"
+  short_description: "Registra etapas entregues e sincroniza a wiki"
+  default_prompt: "Use $azure-devops-progress-sync para registrar este incremento no Azure DevOps."
