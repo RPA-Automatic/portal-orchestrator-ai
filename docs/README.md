@@ -26,6 +26,10 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 - [Contrato futuro com o Solution Design Architecture Agent](integrations/solution-design-architecture-agent.md)
 
+## Privacidade
+
+- [Revisão LGPD dos três projetos e plano de adequação](security/lgpd-review-2026-09-13.md)
+
 ## Decisões e qualidade
 
 - [ADR-0001 — Separação dos portais](decisions/ADR-0001-separacao-dos-portais.md)
@@ -34,7 +38,7 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 ## Referências e histórico
 
-- [Referências de plataformas de orquestração](reference/orchestration-platforms.md)
+- [Critérios próprios de orquestração](reference/orchestration-platforms.md)
 - [SDD legado](archive/SDD-legacy-2026-09-13.md)
 
 ## Azure DevOps

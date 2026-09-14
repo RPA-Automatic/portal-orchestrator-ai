@@ -36,6 +36,7 @@ export function BrandFooter() {
         width={2172}
         height={724}
       />
+      <p className="brand-tagline">Qual é o próximo passo?<br />Você decide. A gente faz acontecer.</p>
       <small>
         © {new Date().getFullYear()} RPA Automatic. Todos os direitos
         reservados.

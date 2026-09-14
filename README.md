@@ -75,8 +75,6 @@ Netlify: build `npm run build`, publish `dist`, configuração em `netlify.toml`
 - [SDD atual](docs/architecture/SDD.md)
 - [Catálogo de agentes](docs/product/agent-catalog.md)
 - [Validação e pendências](docs/quality/validation.md)
-- [UiPath Orchestrator](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/introduction)
-- [UiPath Coding Agents](https://docs.uipath.com/pt-BR/coding-agents/standalone/latest/user-guide/overview)
 - [Supabase Auth](https://supabase.com/docs/reference/javascript/auth-signinwithpassword)
 
 Rollback: redeploy da versão anterior na Netlify; a função anterior está no histórico Supabase. Antes de desfazer migrations, exporte dados `ao_*`; não remova tabelas de outros processos do projeto compartilhado.

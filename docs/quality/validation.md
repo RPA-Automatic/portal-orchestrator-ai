@@ -36,7 +36,7 @@ Data: 09/09/2026.
 - `tests/visual.html` e `tests/visual.ts` são uma fixture de desenvolvimento com sessão fictícia em memória e chamadas de API simuladas. Não são entradas de build nem recursos publicados em `dist/`; não validam operações reais no Supabase.
 - Assets PNG originais preservados. Cabeçalho horizontal, rodapé compacto e manifesto/kit da marca atualizados.
 
-Não foi concluído login com a conta do proprietário, execução paga de IA ou consulta GitHub através da credencial pessoal do portal. Esses testes dependem das credenciais cadastradas em Integrações. A navegação autenticada na conta UiPath encontrou a tela de login; a referência funcional veio da documentação pública, não de dados privados da conta.
+Não foi concluído login com a conta do proprietário, execução paga de IA ou consulta GitHub através da credencial pessoal do portal. Esses testes dependem das credenciais cadastradas em Integrações.
 
 O verificador Supabase reportou proteção contra senhas vazadas desativada (configuração preexistente). O aviso informativo de RLS sem política no schema privado de credenciais é intencional: todo acesso de usuário é negado; somente o backend de serviço tem acesso. O CLI local não estava autenticado nesta revalidação; nenhuma migration ou Edge Function foi alterada remotamente.
 
@@ -45,3 +45,9 @@ O verificador Supabase reportou proteção contra senhas vazadas desativada (con
 ## Escopo ainda não concluído do SDD
 
 Workers isolados, execução real de ferramentas MCP, alterações de código/PR por agente, agendamento, filas de itens transacionais, busca vetorial, múltiplos provedores e compartilhamento entre membros não estão ativos. Não interpretar cadastros ou propostas geradas como execução dessas operações.
+
+## Privacidade e assinatura da marca — 2026-09-13
+
+Implementado: cartão comparativo removido, integrações com nomes funcionais, fontes locais, CSP restrita e frase do rodapé “Qual é o próximo passo? Você decide. A gente faz acontecer.”. Relatório dos três projetos em [Revisão LGPD](../security/lgpd-review-2026-09-13.md).
+
+Validação executada: `npm test` (quatro testes), `npm run build` (TypeScript e Vite), inspeção da página Integrações e do rodapé com a fixture sintética local; viewport de 390 px sem transbordamento horizontal. Não houve cadastro de credencial nem execução de IA paga. Consultas remotas de privacidade foram somente de metadados, sem gravações. Não houve teste completo de exclusão/retencão ou certificação LGPD.

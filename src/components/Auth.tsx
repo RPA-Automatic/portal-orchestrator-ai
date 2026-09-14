@@ -136,7 +136,7 @@ export function Auth() {
             : "Já tenho uma conta"}
         </button>
         <p className="auth-note">
-          <ShieldCheck size={15} /> Autenticação segura com Supabase
+          <ShieldCheck size={15} /> Acesso protegido ao seu workspace
         </p>
       </section>
       <BrandFooter />

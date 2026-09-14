@@ -440,11 +440,14 @@ function Workspace({ session }: { session: Session }) {
             >
               <option value="demo">Demonstração (sem IA)</option>
               <option value="openai" disabled={!health?.openai}>
-                IA · {health?.openai ? "OpenAI" : "configure a credencial"}
+                IA · {health?.openai ? "habilitada" : "configure a credencial"}
               </option>
             </select>
           </label>
         </div>
+        {mode === "openai" && <p className="muted">
+          O objetivo, as instruções, as memórias selecionadas automaticamente e as etapas anteriores serão enviados ao serviço de IA. Inclua apenas dados necessários e autorizados; não envie senhas ou tokens.
+        </p>}
         <div className="composer-bottom">
           <small>
             <ShieldCheck size={14} />

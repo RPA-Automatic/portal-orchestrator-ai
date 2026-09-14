@@ -1,6 +1,4 @@
-> Projeção operacional revisada em 2026-09-13. `docs/` permanece canônico; esta árvore acompanha a promoção para a `main`. Recursos planejados não equivalem a implantação.
-
-> Fonte: `docs/quality/validation.md`
+> Fonte canônica: `docs/quality/validation.md`
 
 # Validação da entrega
 
@@ -9,7 +7,7 @@
 > Versão: 1.0  
 > Última revisão: 2026-09-13  
 > Próxima revisão: após a próxima entrega funcional
-> Documentos relacionados: Catálogo documental (`docs/README.md`)  
+> Documentos relacionados: [Catálogo documental](../README.md)  
 
 Data: 09/09/2026.
 
@@ -22,15 +20,25 @@ Data: 09/09/2026.
 
 ## Revalidação de promoção — 13/09/2026
 
-- A `main` recebeu a aplicação pelo PR #2 e a produção respondeu HTTP 200 com o título correto.
-- Vite atualizado para `8.3.0`; `npm audit` passou sem vulnerabilidades conhecidas.
+- A `main` recebeu a aplicação pelo PR #2 e a URL de produção respondeu HTTP 200 com o título `Portal Orchestrator AI`.
+- A resposta de produção incluiu CSP, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e política de referência.
+- Vite atualizado de `8.0.13` para `8.3.0`; `npm audit` passou sem vulnerabilidades conhecidas.
 - Testes automatizados: 2/2 aprovados com Node 24.19.0.
 - TypeScript e build Vite de produção aprovados.
-- Workflows de validação cobrem `main` e `dev`; a publicação manual usa a `main`.
+- Workflows de validação passaram a cobrir `main` e `dev`; a publicação manual da Netlify usa a `main`.
 
 ## Limitações de validação
 
-Não foi concluído login com a conta do proprietário, execução paga de IA ou consulta GitHub através da credencial pessoal do portal. Esses testes dependem das credenciais cadastradas em Integrações. A navegação autenticada na conta UiPath encontrou a tela de login; a referência funcional veio da documentação pública, não de dados privados da conta.
+### Revisão visual — 13/09/2026
+
+- Node 24.19.0: `npm test` aprovado (4 testes, incluindo 40 combinações de preferência/sistema/armazenamento no script de tema) e `npm run build` aprovado.
+- Navegador: login e dashboard nos temas claro/escuro; preferência preservada ao recarregar; sugestões preenchem objetivo e área; catálogo abre com dados existentes na fixture.
+- Diálogo: foco inicial no nome, Tab contido no modal, Escape fecha e restaura foco ao botão de edição. Navegação móvel abre e fecha ao selecionar uma área.
+- Revisão responsiva local, incluindo larguras de 320 px, 390 px e 768 px, sem overflow horizontal da página. Tabelas mantêm sua própria rolagem horizontal.
+- `tests/visual.html` e `tests/visual.ts` são uma fixture de desenvolvimento com sessão fictícia em memória e chamadas de API simuladas. Não são entradas de build nem recursos publicados em `dist/`; não validam operações reais no Supabase.
+- Assets PNG originais preservados. Cabeçalho horizontal, rodapé compacto e manifesto/kit da marca atualizados.
+
+Não foi concluído login com a conta do proprietário, execução paga de IA ou consulta GitHub através da credencial pessoal do portal. Esses testes dependem das credenciais cadastradas em Integrações.
 
 O verificador Supabase reportou proteção contra senhas vazadas desativada (configuração preexistente). O aviso informativo de RLS sem política no schema privado de credenciais é intencional: todo acesso de usuário é negado; somente o backend de serviço tem acesso. O CLI local não estava autenticado nesta revalidação; nenhuma migration ou Edge Function foi alterada remotamente.
 
@@ -40,4 +48,8 @@ O verificador Supabase reportou proteção contra senhas vazadas desativada (con
 
 Workers isolados, execução real de ferramentas MCP, alterações de código/PR por agente, agendamento, filas de itens transacionais, busca vetorial, múltiplos provedores e compartilhamento entre membros não estão ativos. Não interpretar cadastros ou propostas geradas como execução dessas operações.
 
-[Voltar ao produto](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_wiki/wikis/a872b434-77b1-4e65-ba18-923abf5021f1?pagePath=%2Fportal-orchestrator-ai)
+## Privacidade e assinatura da marca — 2026-09-13
+
+Implementado: cartão comparativo removido, integrações com nomes funcionais, fontes locais, CSP restrita e frase do rodapé “Qual é o próximo passo? Você decide. A gente faz acontecer.”. Relatório dos três projetos em [Revisão LGPD](../security/lgpd-review-2026-09-13.md).
+
+Validação executada: `npm test` (quatro testes), `npm run build` (TypeScript e Vite), inspeção da página Integrações e do rodapé com a fixture sintética local; viewport de 390 px sem transbordamento horizontal. Não houve cadastro de credencial nem execução de IA paga. Consultas remotas de privacidade foram somente de metadados, sem gravações. Não houve teste completo de exclusão/retencão ou certificação LGPD.

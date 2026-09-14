@@ -60,7 +60,7 @@ Visão geral, Tarefas/Jobs, Agentes, Fluxos/Processos, Triggers, Schedules, Queu
 
 ## Fora do escopo atual
 
-- Reimplementar mecanismos proprietários de UiPath, Automation Anywhere ou Blue Prism.
+- Reimplementar mecanismos proprietários de terceiros.
 - Armazenar segredos no frontend, Git, logs ou colunas de uso comum.
 - Executar código arbitrário sem isolamento, limites e aprovação.
 - Apresentar registros de configuração como integrações já funcionais.

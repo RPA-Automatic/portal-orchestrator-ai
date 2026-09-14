@@ -1,30 +1,19 @@
-# Referências de plataformas de orquestração
+# Critérios próprios de orquestração
 
-> Status: Rascunho  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 0.1  
-> Última revisão: 2026-09-13  
-> Próxima revisão: antes do próximo benchmark de produto
+> Status: Aprovado
+> Última revisão: 2026-09-13
 
-## Finalidade
+A RPA Automatic apresenta capacidades próprias, sem cartões comparativos, logotipos ou referências promocionais a outras empresas.
 
-Registrar fontes públicas usadas como referência de conceitos e experiência. Referência não significa compatibilidade implementada nem autorização para copiar APIs ou elementos proprietários.
+| Capacidade | Critério do produto |
+|---|---|
+| Tarefas e execuções | Objetivo, responsável, estado e evidência rastreáveis |
+| Filas e gatilhos | Idempotência, reprocessamento controlado e limites de execução |
+| Agentes e contexto | Instruções versionadas e acesso somente ao contexto autorizado |
+| Revisões | Decisão humana registrada antes das ações que a exigirem |
+| Observabilidade | Eventos suficientes para diagnóstico, sem segredos ou conteúdo pessoal desnecessário |
+| Integrações | Disponibilidade comprovada, escopo mínimo e identificação técnica correta |
 
-| Plataforma | Tópicos de interesse | Fonte inicial |
-|---|---|---|
-| UiPath Orchestrator | jobs, queues, folders, assets, triggers e monitoring | https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/introduction |
-| Automation Anywhere | control room, bots, schedules e governança | Documentação pública a validar na investigação |
-| Blue Prism | control room, schedules, queues e runtime resources | Documentação pública a validar na investigação |
-| n8n | canvas, nodes, executions, credentials e error handling | https://docs.n8n.io/ |
-| Microsoft Foundry | agentes, ferramentas, avaliação, observabilidade e governança | https://learn.microsoft.com/azure/ai-foundry/ |
+Estes critérios não afirmam que todas as capacidades já foram implementadas. O SDD e o catálogo registram a disponibilidade real.
 
-## Método
-
-- Registrar data, URL e conceito observado.
-- Separar documentação pública de observação em portal autenticado.
-- Não coletar credenciais, dados privados ou endpoints não documentados.
-- Converter aprendizados em requisito, hipótese ou ADR próprio; não copiar a arquitetura do fornecedor.
-
-## UiPath Cloud
-
-Uma investigação autenticada, se necessária, será executada em tarefa separada com autorização e escopo definidos. Este documento não afirma que a conta UiPath está conectada ao portal.
+Nomes técnicos de APIs, dependências, licenças e registros de operadores de dados precisam permanecer exatos na documentação de operação e privacidade. Não apresentar serviços de terceiros como infraestrutura própria.

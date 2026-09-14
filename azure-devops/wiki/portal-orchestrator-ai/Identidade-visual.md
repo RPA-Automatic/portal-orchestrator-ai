@@ -32,3 +32,11 @@ Neste portal, a marca completa aparece no login; o robô identifica o assistente
 - Tokens semânticos centralizados em `src/styles.css`, compartilhados por login, tabelas, cards, formulários e diálogos. A barra lateral vira um diálogo de navegação no celular.
 
 O canvas React Flow permanece planejado. Adotar Next.js, Motion ou React Flow exige uma necessidade funcional própria; o sistema visual atual não depende dessas migrações.
+
+## Referências públicas e privacidade
+
+A interface deve apresentar somente a identidade RPA Automatic, sem comparativos ou divulgação de marcas de outras empresas. Use nomes funcionais para os serviços. Identificadores de APIs, dependências e licenças permanecem exatos no código e na documentação técnica; a identificação de operadores/suboperadores não deve ser omitida dos registros de privacidade. Login federado, quando habilitado, precisa identificar corretamente a conta de destino.
+
+Fontes tipográficas são distribuídas pelo próprio portal, sem requisições do navegador a serviços externos de fontes. Isso reduz o compartilhamento desnecessário de IP e metadados de navegação.
+
+O rodapé apresenta a assinatura “Qual é o próximo passo? Você decide. A gente faz acontecer.” entre a marca e os direitos reservados, com adaptação para telas menores.

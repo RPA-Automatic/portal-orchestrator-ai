@@ -41,7 +41,7 @@ O Portal Orchestrator AI coordena agentes, contexto, fluxos e aprovações em um
 - Execution plane assíncrono com workers isolados, filas, retry, timeout e artefatos.
 - Model gateway e MCP gateway substituíveis.
 - Canvas visual para composição e cockpit operacional para acompanhamento.
-- Integrações por adapters, inclusive SDA, UiPath e APIs, sem dependência de contratos proprietários não documentados.
+- Integrações por adapters, inclusive SDA e APIs autorizadas, sem dependência de contratos proprietários não documentados.
 
 ## Componentes e responsabilidades
 
