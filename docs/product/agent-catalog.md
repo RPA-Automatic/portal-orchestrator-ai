@@ -1,11 +1,11 @@
 # Catálogo de agentes
 
-> Status: Aprovado  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
-> Próxima revisão: quando um agente for adicionado, removido ou integrado  
-> Documentos relacionados: [Catálogo documental](../README.md)  
+> Status: Aprovado
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
+> Próxima revisão: quando um agente for adicionado, removido ou integrado
+> Documentos relacionados: [Catálogo documental](../README.md)
 > Fonte implementada: `supabase/functions/agent-orchestrator/registry.json`
 
 ## Agentes internos atuais
@@ -18,6 +18,17 @@
 | Sentinel | `reviewer` | Qualidade, segurança e lacunas | Objetivo e entregas anteriores | Revisão crítica | Implementado |
 
 Os quatro agentes geram conteúdo. Eles não executam shell, testes, commits, PRs, deploys ou ações em sistemas externos.
+
+## Biblioteca executável
+
+| Exemplo | Modo | Resultado |
+|---|---|---|
+| Guardião de dados | Regras determinísticas | Campos vazios, duplicidade de IDs e completude de um lote JSON |
+| Analista de conteúdo | Regras determinísticas | Palavras, frases, termos frequentes e tempo de leitura |
+| Organizador de demandas | Regras determinísticas | Prioridade e área por palavras-chave explícitas |
+| Arquiteto de processos | IA, com credencial | Plano e revisão do processo com o fluxo de agentes |
+
+A fonte é `supabase/functions/agent-orchestrator/templates.ts`. Os três exemplos por regras não usam um modelo de linguagem. Entrada, resultado e etapas ficam persistidos. Todos podem ser agendados; a entrega permanece sujeita à revisão.
 
 ## Agente externo planejado
 

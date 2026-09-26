@@ -1,16 +1,14 @@
-> Projeção operacional revisada em 2026-09-13. `docs/` permanece canônico; esta árvore acompanha a promoção para a `main`. Recursos planejados não equivalem a implantação.
-
-> Fonte: `docs/product/product-spec.md`
+> Fonte canônica: `docs/product/product-spec.md`. Projeção de 26/09/2026.
 
 # Especificação do Produto — Portal Orchestrator AI
 
-> Status: Em revisão  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
-> Próxima revisão: 2026-12-13  
-> Documentos relacionados: Catálogo documental (`docs/README.md`)  
-> Relacionados: `../architecture/SDD.md` (`docs/architecture/SDD.md`), `agent-catalog.md` (`docs/product/agent-catalog.md`)
+> Status: Em revisão
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
+> Próxima revisão: 2026-12-13
+> Documentos relacionados: [Catálogo documental](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/README.md)
+> Relacionados: [`../architecture/SDD.md`](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/architecture/SDD.md), [`agent-catalog.md`](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/product/agent-catalog.md)
 
 ## Visão
 
@@ -36,11 +34,14 @@ O Portal Orchestrator AI é um control plane para registrar, governar, executar 
 - Code Assist de leitura via GitHub Contents API.
 - Credenciais OpenAI/GitHub cifradas no backend.
 
+- Biblioteca executável, editor sequencial, agenda persistente e monitoramento com dados reais.
+- Processamento assíncrono no servidor, leases e reexecução explícita.
+
 ### Planejado
 
-- Cockpit operacional ampliado e canvas visual para composição de fluxos.
+- Canvas de grafos com ramificações e condições.
 - Tenants, membros, papéis e ambientes `dev`, `qa` e `prod`.
-- Jobs assíncronos com workers contínuos, filas, schedules, triggers e artefatos.
+- Workers em containers, gatilhos de eventos externos e artefatos em Storage.
 - Descoberta e execução real de ferramentas MCP.
 - Integração do Solution Design Architecture Agent como executor externo.
 
@@ -75,5 +76,3 @@ Visão geral, Tarefas/Jobs, Agentes, Fluxos/Processos, Triggers, Schedules, Queu
 - Uma execução apresenta estado, etapas, saída segura, falha, retry e auditoria.
 - O contrato do SDA pode ser implementado sem alterar o modelo central de jobs.
 - Todos os recursos futuros de tenant e ambiente têm autorização definida antes da exposição no frontend.
-
-[Voltar ao produto](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_wiki/wikis/a872b434-77b1-4e65-ba18-923abf5021f1?pagePath=%2Fportal-orchestrator-ai)

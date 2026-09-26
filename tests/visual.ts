@@ -22,7 +22,7 @@ window.fetch = async (input, init) => {
     if (init?.method && init.method !== 'GET') return Response.json({message:'Gravação desativada na fixture visual'}, {status:400});
     data = resources;
   } else if (url.pathname.endsWith('ao_runs')) data = runs;
-  else if (url.pathname.endsWith('ao_memory') || url.pathname.endsWith('ao_events')) data = [];
+  else if (url.pathname.endsWith('ao_memory') || url.pathname.endsWith('ao_events') || url.pathname.endsWith('ao_schedules')) data = [];
   else throw new Error('API não simulada na fixture visual');
   return Response.json(data);
 };

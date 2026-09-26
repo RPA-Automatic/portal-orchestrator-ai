@@ -40,6 +40,11 @@ export function Catalog({
     setBusy(true);
     try {
       const config = JSON.parse(String(f.get("config") || "{}"));
+      if (kind === "workflow") {
+        config.agent_ids = f.getAll("agent_id").map(String).filter(Boolean);
+        if (!config.agent_ids.length)
+          throw new Error("Escolha pelo menos um agente para o fluxo.");
+      }
       if (!config || Array.isArray(config) || typeof config !== "object")
         throw new Error("Use um objeto JSON para a configuração.");
       const data = {
@@ -78,7 +83,7 @@ export function Catalog({
           {kind === "agent"
             ? "Instruções especializadas usadas nas próximas execuções."
             : kind === "workflow"
-              ? "Defina agent_ids com os IDs dos agentes, na ordem de execução (até 4)."
+              ? "Organize até quatro agentes na ordem em que devem trabalhar. Cada execução preserva a configuração utilizada."
               : kind === "mcp"
                 ? "Cadastre endpoints e políticas. A execução remota de ferramentas exige um worker autorizado."
                 : "Contexto reutilizável para os seus projetos e agentes."}
@@ -178,14 +183,54 @@ export function Catalog({
                   maxLength={12000}
                 />
               </label>
-              <label>
-                Configuração (JSON)
-                <textarea
-                  name="config"
-                  defaultValue={JSON.stringify(editing.config || {}, null, 2)}
-                  rows={4}
-                />
-              </label>
+              {kind === "workflow" ? (
+                <fieldset className="workflow-steps">
+                  <legend>Etapas do fluxo</legend>
+                  {[0, 1, 2, 3].map((index) => (
+                    <label className="workflow-step" key={index}>
+                      <span>{index + 1}.</span>
+                      <select
+                        name="agent_id"
+                        aria-label={`Agente da etapa ${index + 1}`}
+                        defaultValue={
+                          Array.isArray(editing.config?.agent_ids)
+                            ? String(editing.config.agent_ids[index] || "")
+                            : ""
+                        }
+                      >
+                        <option value="">
+                          {index === 0
+                            ? "Escolha um agente"
+                            : "Sem etapa adicional"}
+                        </option>
+                        {resources
+                          .filter((r) => r.kind === "agent")
+                          .map((r) => (
+                            <option value={r.id} key={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : (
+                <details>
+                  <summary>Configurações avançadas</summary>
+                  <label>
+                    Configuração (JSON)
+                    <textarea
+                      name="config"
+                      defaultValue={JSON.stringify(
+                        editing.config || {},
+                        null,
+                        2,
+                      )}
+                      rows={4}
+                    />
+                  </label>
+                </details>
+              )}
               <button className="primary" disabled={busy}>
                 {busy ? "Salvando…" : "Salvar"}
               </button>

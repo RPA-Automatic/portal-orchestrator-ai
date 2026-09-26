@@ -1,11 +1,11 @@
 # Especificação do Produto — Portal Orchestrator AI
 
-> Status: Em revisão  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
-> Próxima revisão: 2026-12-13  
-> Documentos relacionados: [Catálogo documental](../README.md)  
+> Status: Em revisão
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
+> Próxima revisão: 2026-12-13
+> Documentos relacionados: [Catálogo documental](../README.md)
 > Relacionados: [`../architecture/SDD.md`](../architecture/SDD.md), [`agent-catalog.md`](agent-catalog.md)
 
 ## Visão
@@ -32,11 +32,14 @@ O Portal Orchestrator AI é um control plane para registrar, governar, executar 
 - Code Assist de leitura via GitHub Contents API.
 - Credenciais OpenAI/GitHub cifradas no backend.
 
+- Biblioteca executável, editor sequencial, agenda persistente e monitoramento com dados reais.
+- Processamento assíncrono no servidor, leases e reexecução explícita.
+
 ### Planejado
 
-- Cockpit operacional ampliado e canvas visual para composição de fluxos.
+- Canvas de grafos com ramificações e condições.
 - Tenants, membros, papéis e ambientes `dev`, `qa` e `prod`.
-- Jobs assíncronos com workers contínuos, filas, schedules, triggers e artefatos.
+- Workers em containers, gatilhos de eventos externos e artefatos em Storage.
 - Descoberta e execução real de ferramentas MCP.
 - Integração do Solution Design Architecture Agent como executor externo.
 

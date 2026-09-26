@@ -1,9 +1,9 @@
 # Documentação — Portal Orchestrator AI
 
-> Status: Aprovado  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
+> Status: Aprovado
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
 > Próxima revisão: 2026-12-13
 
 Este é o índice oficial. O código, as migrations e os testes são a fonte para comportamento implementado; documentos de visão e contratos futuros descrevem evolução, não disponibilidade.
@@ -20,7 +20,7 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 - [SDD atual](architecture/SDD.md)
 - [Diagramas](architecture/diagrams/README.md)
-- [Modelo futuro do control plane](data/control-plane-model.md)
+- [Modelo atual e evolução do control plane](data/control-plane-model.md)
 
 ## Integrações
 
@@ -32,9 +32,13 @@ Este é o índice oficial. O código, as migrations e os testes são a fonte par
 
 ## Decisões e qualidade
 
+- [Homologação 26/09/2026](quality/release-2026-09-26.md)
+- [Execução autônoma](decisions/ADR-0002-execucao-autonoma.md)
+- [Operação do runtime](operations/runtime.md)
+
 - [ADR-0001 — Separação dos portais](decisions/ADR-0001-separacao-dos-portais.md)
 - [Validação conhecida](quality/validation.md)
-- [Estado atual: exemplos, modelos, arquitetura e DevOps](quality/product-status-2026-09-13.md)
+- [Histórico de 13/09: exemplos, modelos, arquitetura e DevOps](quality/product-status-2026-09-13.md)
 - [Auditoria GitHub/Netlify/Supabase — 2026-09-13](quality/environment-audit-2026-09-13.md)
 
 ## Referências e histórico

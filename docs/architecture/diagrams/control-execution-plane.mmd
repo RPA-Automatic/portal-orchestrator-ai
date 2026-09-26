@@ -1,20 +1,11 @@
 flowchart TB
-    subgraph Control[Control plane]
-      UI[React/Vite]
-      Auth[Supabase Auth]
-      DB[(PostgreSQL/RLS)]
-      Edge[Edge Function]
-      UI --> Auth
-      UI --> Edge
-      Edge --> DB
-    end
-    subgraph Execution[Execution plane]
-      Current[Etapa por chamada do frontend]
-      Queue[Queue durável - planejada]
-      Worker[Worker isolado - planejado]
-      Gateway[Model/MCP gateways - planejados]
-      Queue -.-> Worker
-      Worker -.-> Gateway
-    end
-    Edge --> Current
-    Edge -. evolução .-> Queue
+  UI[Portal React/Vite] -->|sessão validada| API[Edge Function API]
+  API -->|criação atômica + snapshot| Queue[(ao_runs: fila persistente)]
+  Cron[Cron a cada minuto] -->|token no Vault| Worker[Worker: uma etapa por lease]
+  Schedules[(ao_schedules)] --> Worker
+  Worker -->|SKIP LOCKED| Queue
+  Worker --> Rules[Automações por regras]
+  Worker --> AI[Provedor de IA]
+  Worker --> Results[(Etapas, eventos e resultados)]
+  UI -->|RLS + atualização a cada 5s| Results
+  UI --> Review[Aprovação humana]

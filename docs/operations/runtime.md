@@ -1,5 +1,3 @@
-> Fonte canônica: `docs/operations/runtime.md`. Projeção de 26/09/2026.
-
 # Operação do runtime
 
 Revisão: 26/09/2026.

@@ -1,11 +1,13 @@
-# Validação da entrega
+# Validação histórica da entrega
 
-> Status: Em revisão  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
+A versão atual está documentada em [Homologação de 26/09/2026](release-2026-09-26.md). As limitações abaixo descrevem as respectivas datas.
+
+> Status: Em revisão
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
 > Próxima revisão: após a próxima entrega funcional
-> Documentos relacionados: [Catálogo documental](../README.md)  
+> Documentos relacionados: [Catálogo documental](../README.md)
 
 Data: 09/09/2026.
 

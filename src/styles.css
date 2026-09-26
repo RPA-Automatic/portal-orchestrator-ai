@@ -1826,3 +1826,19 @@ main > .page-heading,
     transform: none;
   }
 }
+
+/* Central operacional: cartões acionáveis, biblioteca e leitura responsiva. */
+.launch-banner { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px; margin-bottom:24px; border:1px solid var(--border); border-radius:18px; background:linear-gradient(115deg,rgba(42,109,245,.12),transparent); }
+.launch-banner strong { font-size:1.2rem; }
+.launch-banner p { margin:8px 0 0; color:var(--muted); }
+.metric-action { display:block; text-align:left; padding:0; border:0; background:transparent; width:100%; }
+.metric-action .panel { margin:0; height:100%; transition:transform .15s; }
+.metric-action:hover .panel { transform:translateY(-3px); }
+.approval-grid { display:grid; gap:20px; }
+.catalog-grid .button-row { flex-wrap:wrap; margin-top:20px; }
+.catalog-grid > .panel { display:flex; flex-direction:column; }
+.catalog-grid > .panel > p { flex:1; }
+.workflow-steps { display:grid; gap:12px; margin:12px 0; }
+.workflow-step { display:flex; align-items:center; gap:12px; }
+.workflow-step select { flex:1; min-width:0; }
+@media(max-width:700px){.launch-banner{align-items:flex-start;flex-direction:column}.view-toolbar{align-items:stretch;flex-direction:column}.view-toolbar .search{display:flex}.catalog-grid{grid-template-columns:1fr}}

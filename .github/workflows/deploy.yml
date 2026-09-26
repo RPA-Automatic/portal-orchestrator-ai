@@ -21,4 +21,7 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: npx netlify-cli deploy --prod --dir=dist --no-build
+        run: |
+          : "${NETLIFY_AUTH_TOKEN:?Configure o secret NETLIFY_AUTH_TOKEN no GitHub Actions}"
+          : "${NETLIFY_SITE_ID:?Configure o secret NETLIFY_SITE_ID no GitHub Actions}"
+          npx --yes --package=netlify-cli@27.10.0 netlify deploy --prod --dir=dist --no-build

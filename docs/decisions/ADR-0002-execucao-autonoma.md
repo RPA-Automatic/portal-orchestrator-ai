@@ -1,5 +1,3 @@
-> Fonte canônica: `docs/decisions/ADR-0002-execucao-autonoma.md`. Projeção de 26/09/2026.
-
 # ADR-0002 — Execução autônoma e separação do domínio
 
 Status: implementado em 26/09/2026.

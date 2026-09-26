@@ -1,112 +1,52 @@
-> Projeção operacional revisada em 2026-09-13. `docs/` permanece canônico; esta árvore acompanha a promoção para a `main`. Recursos planejados não equivalem a implantação.
-
-> Fonte: `docs/architecture/SDD.md`
+> Fonte canônica: `docs/architecture/SDD.md`. Projeção de 26/09/2026.
 
 # SDD — Portal Orchestrator AI
 
-> Status: Em revisão  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
-> Próxima revisão: 2026-12-13  
-> Documentos relacionados: Catálogo documental (`docs/README.md`)  
-> Relacionados: `../product/product-spec.md` (`docs/product/product-spec.md`), `../data/control-plane-model.md` (`docs/data/control-plane-model.md`), `../integrations/solution-design-architecture-agent.md` (`docs/integrations/solution-design-architecture-agent.md`)
+Status: implementado, com limites descritos. Revisão: 26/09/2026. Versão: 2.0.
 
-## Objetivo e limites
+## Responsabilidades
 
-O Portal Orchestrator AI coordena agentes, contexto, fluxos e aprovações em uma interface web. Esta versão do SDD diferencia capacidades comprovadas, evolução planejada e hipóteses. O código, as migrations e os testes prevalecem quando houver divergência.
-
-## Estado implementado
-
-### Frontend
-
-- React 19, TypeScript e Vite, publicado na Netlify.
-- SPA em português com autenticação, catálogo, tarefas, memória, Code Assist, integrações e auditoria.
-- Polling periódico; não há assinatura Supabase Realtime ativa.
-
-### Control plane
-
-- Supabase Auth, PostgreSQL, RLS e Edge Function `agent-orchestrator`.
-- Workspaces individuais, recursos `ao_*`, execuções sequenciais, snapshots, eventos e aprovação humana.
-- Credenciais por usuário/provedor cifradas com AES-GCM em schema privado.
-- Chamada OpenAI no backend e leitura do GitHub Contents API.
-
-### Execution plane
-
-- A Edge Function processa uma etapa por chamada iniciada pelo frontend.
-- Modo demonstração é determinístico; modo IA requer credencial disponível.
-- Não há worker contínuo, sandbox de código, executor RPA ou runtime MCP.
-
-## Arquitetura-alvo planejada
-
-- Control plane multi-tenant com ambientes, RBAC, versões e políticas.
-- Execution plane assíncrono com workers isolados, filas, retry, timeout e artefatos.
-- Model gateway e MCP gateway substituíveis.
-- Canvas visual para composição e cockpit operacional para acompanhamento.
-- Integrações por adapters, inclusive SDA e APIs autorizadas, sem dependência de contratos proprietários não documentados.
-
-## Componentes e responsabilidades
-
-| Componente | Estado | Responsabilidade |
+| Componente | Implementação | Responsabilidade |
 |---|---|---|
-| SPA React/Vite | Implementado | Interface, sessão e chamadas autenticadas |
-| Supabase Auth/Postgres/RLS | Implementado | Identidade, persistência e isolamento atual |
-| Edge Function | Implementado | Validação de sessão, credenciais e execução de etapas |
-| OpenAI adapter | Implementado | Geração via Responses no backend |
-| GitHub read adapter | Implementado | Leitura controlada de repositórios |
-| Job service/queue | Planejado | Execução durável e assíncrona |
-| Worker runtime | Planejado | Ferramentas e automações isoladas |
-| MCP gateway | Planejado | Descoberta, política e invocação de tools |
-| SDA adapter | Planejado | Submissão e acompanhamento de arquitetura |
+| Interface | React, TypeScript e Vite | Catálogo, composição sequencial, agendas, monitoramento, revisão e exportação |
+| Identidade | Supabase Auth | Sessão individual, cadastro e login |
+| Dados | Postgres e RLS | Isolamento por proprietário, snapshots e histórico |
+| API | Edge Function `agent-orchestrator` | Validação, autorização e criação idempotente |
+| Fila | `ao_runs`, estado `queued` | Trabalho persistente aguardando reserva |
+| Despachante | Cron + pg_net + Vault | Chamada autenticada a cada minuto |
+| Worker | Edge Function, uma etapa por lease | Regras determinísticas ou chamada de IA com timeout |
+| Revisão | Transição condicional de estado | Aceitar/rejeitar resultados sem efeitos externos implícitos |
 
-## Contratos atuais
+A primeira etapa de uma solicitação manual é também iniciada em background. A continuidade é responsabilidade do servidor. O navegador atualiza os registros a cada cinco segundos e não executa o laço de processamento.
 
-- O frontend obtém sessão Supabase e chama a Edge Function com token de usuário.
-- A Edge Function revalida o usuário com `auth.getUser`.
-- Fluxos referenciam até quatro IDs de agentes em ordem.
-- Cada execução preserva snapshot dos agentes e contexto usado.
-- Aprovação registra decisão, mas não cria PR, deploy ou efeito externo.
+## Navegação e contratos
 
-## Segurança e governança
+Visão geral, Tarefas, Biblioteca, Agentes, Fluxos, Agendamentos, Monitoramento, Aprovações, Skills, Instruções, Memória, Code Assist, Integrações, Auditoria e Configurações. A área selecionada é preservada no fragmento da URL. Modais usam foco controlado e rótulos acessíveis. As identidades visuais aprovadas permanecem locais.
 
-- Nenhuma chave privilegiada pode entrar no bundle, Git ou logs.
-- Tabelas expostas exigem RLS e autorização por proprietário/membership.
-- Funções privilegiadas permanecem restritas à role de serviço.
-- Saídas de agentes e conteúdo de repositórios são dados não confiáveis.
-- Efeitos externos exigirão política, idempotência, auditoria e aprovação conforme risco.
-- O modelo futuro de tenant não confiará em `tenant_id` informado apenas pelo cliente.
+Fluxos usam um editor de até quatro etapas com seleção de agentes. Cada job preserva instruções e contexto. A Biblioteca oferece três automações por regras e um exemplo de fluxo com IA; os modos são identificados explicitamente. O modo demonstração anterior continua sendo texto fixo identificado.
 
-## Dados e evolução
+A API implementa `create`, `templates`, `schedule_create`, `schedule_update`, `schedule_toggle`, `decision`, `cancel`, `retry`, `advance`, `recover`, além de bootstrap, health, credenciais e leitura de código. UUID de criação é a chave idempotente. Reexecutar cria outro job com o snapshot original; pode consumir novamente tokens. Agendas não acumulam backlog de ocorrências perdidas.
 
-O modelo implementado está nas migrations `supabase/migrations/`. O modelo futuro está descrito em `../data/control-plane-model.md` (`docs/data/control-plane-model.md`) e só se torna implementado depois de migration, RLS, testes e validação em DEV.
+## Segurança
 
-## Falhas e recuperação
+- `auth.getUser` revalida a sessão em cada chamada de usuário; consultas privilegiadas verificam `owner_id`.
+- RLS e grants limitam os dados visíveis. Clientes não atualizam diretamente estados, etapas ou agendas.
+- Token de worker existe apenas no Vault e no transporte interno. RPCs operacionais são exclusivas de `service_role`.
+- Credenciais de provedores ficam cifradas em `orchestrator_private`; a rotação da chave de serviço ainda exige recadastro das credenciais.
+- Cancelamento invalida o lease; uma resposta tardia não sobrescreve o estado cancelado.
+- Segredos, dados de clientes e payloads completos não entram na documentação ou logs de entrega.
+- O arquivo `billing_legacy` não é exposto pela API do portal. Objetos fiscais não integram o produto.
 
-- Sessão inválida: negar a operação sem fallback privilegiado.
-- Credencial ausente: manter execução não iniciada e orientar configuração.
-- Etapa interrompida: permitir recuperação controlada após a janela existente.
-- Fechamento da aba: etapas posteriores podem permanecer na fila; o usuário pode continuar.
-- Provedor indisponível: registrar erro seguro sem expor credenciais ou payload sensível.
-- Futuro executor externo: usar idempotency key, correlation ID, timeout e reconciliação por status.
+## Limites operacionais
 
-## Observabilidade
+Até 30 tarefas por conta nas últimas 24 horas, uma ativa por conta, quatro etapas por fluxo, 1.600 tokens de saída por etapa de IA e timeout de 60 segundos por chamada ao provedor. Até 20 agendas por conta, com frequências de uma hora, seis horas, um dia ou uma semana. O despachante reserva até três jobs por chamada. Esses limites não constituem orçamento financeiro rígido.
 
-Hoje existem eventos de mudança de estado e health básico de integrações. A evolução deverá incluir logs estruturados, métricas de fila/latência/erro, traces correlacionados, retenção e alertas sem conteúdo sensível.
+Etapas interrompidas falham após três minutos e preservam os resultados anteriores. A reexecução é explícita. As métricas cobrem as últimas 100 execuções; auditoria carrega os últimos 200 eventos. Tokens não são convertidos em cobrança estimada sem tabela de preços verificada.
 
-## Diagramas
+## Evolução planejada
 
-- Contexto (`docs/architecture/diagrams/context.mmd`) · SVG (`docs/architecture/diagrams/context.svg`)
-- Control plane e execution plane (`docs/architecture/diagrams/control-execution-plane.mmd`) · SVG (`docs/architecture/diagrams/control-execution-plane.svg`)
-- Ciclo de um job (`docs/architecture/diagrams/job-lifecycle.mmd`) · SVG (`docs/architecture/diagrams/job-lifecycle.svg`)
-- Versionamento e promoção (`docs/architecture/diagrams/agent-promotion.mmd`) · SVG (`docs/architecture/diagrams/agent-promotion.svg`)
-- Integração futura com SDA (`docs/architecture/diagrams/sda-integration.mmd`) · SVG (`docs/architecture/diagrams/sda-integration.svg`)
+Compartilhamento organizacional, memberships, RBAC, ambientes separados, cobrança de assinatura, SSO, motor de grafos, containers isolados para código, ferramentas MCP reais, filas transacionais de negócio, busca vetorial e integração SDA. O cadastro de projetos ou MCP não é apresentado como executor disponível. O runtime atual é adequado a automações curtas e agentes de geração; não oferece hospedagem de código arbitrário nem SLA empresarial validado.
 
-## Critérios de validação
+## Evidências
 
-- Build e testes atuais continuam aprovados.
-- Documentos não apresentam recurso planejado como disponível.
-- Mudanças de schema incluem migration, RLS e teste de isolamento.
-- Integrações futuras têm contrato, autenticação, timeout, retry e auditoria antes da implementação.
-- Decisões arquiteturais relevantes são registradas em ADR.
-
-[Voltar ao produto](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_wiki/wikis/a872b434-77b1-4e65-ba18-923abf5021f1?pagePath=%2Fportal-orchestrator-ai)
+[Modelo de dados](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/data/control-plane-model.md), [ADR de execução](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/decisions/ADR-0002-execucao-autonoma.md), [homologação de 26/09](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/quality/release-2026-09-26.md) e [diagrama](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/architecture/diagrams/control-execution-plane.mmd).

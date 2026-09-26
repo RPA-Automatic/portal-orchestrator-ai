@@ -9,7 +9,7 @@
 Os `.mmd` são fontes; os `.svg` são derivados. Linhas tracejadas e rótulos “planejado” não representam integrações disponíveis.
 
 - [Contexto](context.mmd) · [SVG](context.svg)
-- [Control e execution plane](control-execution-plane.mmd) · [SVG](control-execution-plane.svg)
+- [Control e execution plane — implementação atual](control-execution-plane.mmd) · [SVG histórico de 13/09](control-execution-plane.svg)
 - [Ciclo de job](job-lifecycle.mmd) · [SVG](job-lifecycle.svg)
 - [Promoção de agente](agent-promotion.mmd) · [SVG](agent-promotion.svg)
 - [SDA futuro](sda-integration.mmd) · [SVG](sda-integration.svg)

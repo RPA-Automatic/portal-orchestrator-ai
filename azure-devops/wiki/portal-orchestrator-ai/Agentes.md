@@ -1,15 +1,13 @@
-> Projeção operacional revisada em 2026-09-13. `docs/` permanece canônico; esta árvore acompanha a promoção para a `main`. Recursos planejados não equivalem a implantação.
-
-> Fonte: `docs/product/agent-catalog.md`
+> Fonte canônica: `docs/product/agent-catalog.md`. Projeção de 26/09/2026.
 
 # Catálogo de agentes
 
-> Status: Aprovado  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 1.0  
-> Última revisão: 2026-09-13  
-> Próxima revisão: quando um agente for adicionado, removido ou integrado  
-> Documentos relacionados: Catálogo documental (`docs/README.md`)  
+> Status: Aprovado
+> Responsável: @RodrigoFreitas16n91
+> Versão: 1.0
+> Última revisão: 2026-09-13
+> Próxima revisão: quando um agente for adicionado, removido ou integrado
+> Documentos relacionados: [Catálogo documental](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/README.md)
 > Fonte implementada: `supabase/functions/agent-orchestrator/registry.json`
 
 ## Agentes internos atuais
@@ -23,16 +21,25 @@
 
 Os quatro agentes geram conteúdo. Eles não executam shell, testes, commits, PRs, deploys ou ações em sistemas externos.
 
+## Biblioteca executável
+
+| Exemplo | Modo | Resultado |
+|---|---|---|
+| Guardião de dados | Regras determinísticas | Campos vazios, duplicidade de IDs e completude de um lote JSON |
+| Analista de conteúdo | Regras determinísticas | Palavras, frases, termos frequentes e tempo de leitura |
+| Organizador de demandas | Regras determinísticas | Prioridade e área por palavras-chave explícitas |
+| Arquiteto de processos | IA, com credencial | Plano e revisão do processo com o fluxo de agentes |
+
+A fonte é `supabase/functions/agent-orchestrator/templates.ts`. Os três exemplos por regras não usam um modelo de linguagem. Entrada, resultado e etapas ficam persistidos. Todos podem ser agendados; a entrega permanece sujeita à revisão.
+
 ## Agente externo planejado
 
 | Agente | Repositório | Responsabilidade | Entrada | Saída | Estado |
 |---|---|---|---|---|---|
 | Solution Design Architecture Agent | `RodrigoFreitas16n91/solution-design-architecture-agent` | Produzir e governar pacotes de arquitetura com rastreabilidade e aprovação | Solicitação versionada e referências autorizadas | Estado, SDD, ADRs, diagramas e evidências | Contrato documentado; integração não implementada |
 
-O contrato planejado está em `../integrations/solution-design-architecture-agent.md` (`docs/integrations/solution-design-architecture-agent.md`).
+O contrato planejado está em [`../integrations/solution-design-architecture-agent.md`](https://github.com/RPA-Automatic/portal-orchestrator-ai/blob/main/docs/integrations/solution-design-architecture-agent.md).
 
 ## Regra de atualização
 
 Uma alteração de ID, capacidade, instrução-base ou estágio de integração deve atualizar este catálogo, o registry implementado quando aplicável e os testes correspondentes. Cadastro de metadados não significa disponibilidade de execução.
-
-[Voltar ao produto](https://dev.azure.com/rpa-automatic/RPA%20Automatic/_wiki/wikis/a872b434-77b1-4e65-ba18-923abf5021f1?pagePath=%2Fportal-orchestrator-ai)

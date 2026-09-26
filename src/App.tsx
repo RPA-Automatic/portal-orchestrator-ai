@@ -3,7 +3,6 @@ import {
   Suspense,
   useCallback,
   useEffect,
-  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -32,6 +31,8 @@ import {
   Terminal,
   Workflow,
   X,
+  CalendarClock,
+  Library as LibraryIcon,
 } from "lucide-react";
 import { supabase, invoke } from "./lib/supabase";
 import {
@@ -43,6 +44,7 @@ import {
   type Memory,
   type Event,
   type Health,
+  type Schedule,
 } from "./lib/types";
 import { Auth } from "./components/Auth";
 import { BrandTop, BrandFooter, AssistantIcon } from "./components/Brand";
@@ -63,6 +65,15 @@ const Integrations = lazy(() =>
 );
 const CodeAssist = lazy(() =>
   import("./components/CodeAssist").then((m) => ({ default: m.CodeAssist })),
+);
+const Library = lazy(() =>
+  import("./components/Library").then((m) => ({ default: m.Library })),
+);
+const Schedules = lazy(() =>
+  import("./components/Schedules").then((m) => ({ default: m.Schedules })),
+);
+const Monitor = lazy(() =>
+  import("./components/Monitor").then((m) => ({ default: m.Monitor })),
 );
 import { ThemeSwitcher } from "./components/ThemeProvider";
 import { Button } from "./components/ui/button";
@@ -85,6 +96,10 @@ const icons = [
   Plug,
   ShieldCheck,
   Settings,
+  LibraryIcon,
+  CalendarClock,
+  Activity,
+  ShieldCheck,
 ];
 const kindFor: Partial<Record<Section, ResourceKind>> = {
   Agentes: "agent",
@@ -114,7 +129,19 @@ export default function App() {
   );
 }
 function Workspace({ session }: { session: Session }) {
-  const [section, setSection] = useState<Section>("Visão geral");
+  const [section, setSection] = useState<Section>(() => {
+    try {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      return sections.includes(hash as Section)
+        ? (hash as Section)
+        : "Visão geral";
+    } catch {
+      return "Visão geral";
+    }
+  });
+  useEffect(() => {
+    window.history.replaceState(null, "", `#${encodeURIComponent(section)}`);
+  }, [section]);
   const [mobile, setMobile] = useState(false);
   const [query, setQuery] = useState("");
   const [runs, setRuns] = useState<Run[]>([]);
@@ -132,7 +159,9 @@ function Workspace({ session }: { session: Session }) {
   const [customWorkflow, setCustomWorkflow] = useState("");
   const [mode, setMode] = useState<"demo" | "openai">("demo");
   const [filter, setFilter] = useState("all");
-  const active = useRef(false);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [scheduleTemplate, setScheduleTemplate] = useState("");
+  const [updated, setUpdated] = useState("");
   const notify = useCallback((s: string) => setMessage(s), []);
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 901px)");
@@ -160,12 +189,18 @@ function Workspace({ session }: { session: Session }) {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(200),
+      supabase
+        .from("ao_schedules")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
     for (const r of results) if (r.error) throw r.error;
     setRuns(results[0].data as Run[]);
     setResources(results[1].data as Resource[]);
     setMemory(results[2].data as Memory[]);
     setEvents(results[3].data as Event[]);
+    setSchedules(results[4].data as Schedule[]);
+    setUpdated(new Date().toISOString());
   }, []);
   const refreshHealth = useCallback(
     async () => setHealth(await invoke<Health>({ action: "health" })),
@@ -215,35 +250,31 @@ function Workspace({ session }: { session: Session }) {
     if (!workspace) return;
     const timer = setInterval(() => {
       void refresh().catch((err) => notify(err.message));
-    }, 10000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [workspace, refresh, notify]);
-  async function advance(initial: Run) {
-    if (active.current) return;
-    active.current = true;
+  async function advance(run: Run) {
     setBusy(true);
-    let run = initial;
     try {
-      while (run.status === "queued") {
-        const result = await invoke<{ run: Run }>({
-          action: "advance",
-          id: run.id,
-        });
-        run = result.run;
-        await refresh();
-      }
-      notify(
-        run.status === "waiting_approval"
-          ? "Entrega pronta para sua revisão."
-          : "Execução atualizada.",
-      );
+      await invoke({ action: "advance", id: run.id });
+      await refresh();
+      notify("Execução encaminhada ao servidor.");
     } catch (err) {
       notify((err as Error).message);
-      await refresh().catch(() => {});
     } finally {
-      active.current = false;
       setBusy(false);
     }
+  }
+  async function openRun(run: Run) {
+    setSelected(run.id);
+    setSection("Tarefas");
+    setFilter("all");
+    await refresh();
+  }
+  function openRunId(id: string) {
+    setSelected(id);
+    setSection("Tarefas");
+    setFilter("all");
   }
   async function create(e: FormEvent) {
     e.preventDefault();
@@ -261,7 +292,10 @@ function Workspace({ session }: { session: Session }) {
       });
       setSelected(result.run.id);
       await refresh();
-      await advance(result.run);
+      setSection("Tarefas");
+      notify(
+        "Execução recebida. Você pode fechar a página; o servidor continuará o processamento.",
+      );
     } catch (err) {
       notify((err as Error).message);
     } finally {
@@ -278,6 +312,7 @@ function Workspace({ session }: { session: Session }) {
   const agents = resources.filter((r) => r.kind === "agent");
   function navigate(s: Section) {
     setSection(s);
+    if (s !== "Agendamentos") setScheduleTemplate("");
     setMobile(false);
     setQuery("");
   }
@@ -324,7 +359,13 @@ function Workspace({ session }: { session: Session }) {
                   <td>
                     <Status value={r.status} />
                   </td>
-                  <td>{r.mode === "demo" ? "Demo" : "IA"}</td>
+                  <td>
+                    {r.mode === "demo"
+                      ? "Demo"
+                      : r.mode === "builtin"
+                        ? "Regras"
+                        : "IA"}
+                  </td>
                   <td>{formatDate(r.created_at)}</td>
                   <td>
                     <button
@@ -445,9 +486,13 @@ function Workspace({ session }: { session: Session }) {
             </select>
           </label>
         </div>
-        {mode === "openai" && <p className="muted">
-          O objetivo, as instruções, as memórias selecionadas automaticamente e as etapas anteriores serão enviados ao serviço de IA. Inclua apenas dados necessários e autorizados; não envie senhas ou tokens.
-        </p>}
+        {mode === "openai" && (
+          <p className="muted">
+            O objetivo, as instruções, as memórias selecionadas automaticamente
+            e as etapas anteriores serão enviados ao serviço de IA. Inclua
+            apenas dados necessários e autorizados; não envie senhas ou tokens.
+          </p>
+        )}
         <div className="composer-bottom">
           <small>
             <ShieldCheck size={14} />
@@ -577,8 +622,7 @@ function Workspace({ session }: { session: Session }) {
             <button
               aria-label="Aprovações pendentes"
               onClick={() => {
-                setFilter("waiting_approval");
-                setSection("Tarefas");
+                setSection("Aprovações");
               }}
             >
               <Bell size={18} />
@@ -600,7 +644,11 @@ function Workspace({ session }: { session: Session }) {
               <p>
                 {section === "Visão geral"
                   ? "Transforme objetivos em entregas com agentes, contexto e revisão."
-                  : "Gerencie seu workspace e acompanhe os resultados."}
+                  : section === "Biblioteca"
+                    ? "Escolha uma automação, personalize os dados e execute."
+                    : section === "Agendamentos"
+                      ? "Seu trabalho continua mesmo quando você está offline."
+                      : "Gerencie seu workspace e acompanhe os resultados."}
               </p>
             </div>
             <div className="heading-aside">
@@ -634,6 +682,21 @@ function Workspace({ session }: { session: Session }) {
               <>
                 {section === "Visão geral" && (
                   <>
+                    <div className="launch-banner">
+                      <div>
+                        <strong>Seu próximo agente já está pronto.</strong>
+                        <p>
+                          Valide dados, organize demandas ou analise conteúdo
+                          com os exemplos da biblioteca.
+                        </p>
+                      </div>
+                      <button
+                        className="primary"
+                        onClick={() => navigate("Biblioteca")}
+                      >
+                        Explorar biblioteca <ArrowUpRight size={16} />
+                      </button>
+                    </div>
                     <div className="metrics">
                       {[
                         {
@@ -744,6 +807,7 @@ function Workspace({ session }: { session: Session }) {
                           onAdvance={advance}
                           onChange={refresh}
                           notify={notify}
+                          onSelect={openRunId}
                         />
                       ) : (
                         <Panel>
@@ -753,6 +817,66 @@ function Workspace({ session }: { session: Session }) {
                     </div>
                     {list}
                   </>
+                )}
+                {section === "Biblioteca" && (
+                  <Library
+                    workspace={workspace}
+                    hasAI={!!health?.openai}
+                    onRun={openRun}
+                    onSchedule={(id) => {
+                      setScheduleTemplate(id);
+                      setSection("Agendamentos");
+                    }}
+                    notify={notify}
+                  />
+                )}
+                {section === "Agendamentos" && (
+                  <Schedules
+                    key={scheduleTemplate}
+                    items={schedules}
+                    workspace={workspace}
+                    resources={resources}
+                    initialTemplate={scheduleTemplate}
+                    onCreated={refresh}
+                    onOpenRun={openRunId}
+                    notify={notify}
+                  />
+                )}
+                {section === "Monitoramento" && (
+                  <Monitor
+                    runs={runs}
+                    schedules={schedules}
+                    updated={updated}
+                    onOpen={openRunId}
+                    onFilter={(status) => {
+                      setFilter(status);
+                      setSection("Tarefas");
+                    }}
+                  />
+                )}
+                {section === "Aprovações" && (
+                  <div className="approval-grid">
+                    {pending.length ? (
+                      pending.map((run) => (
+                        <RunDetail
+                          key={run.id}
+                          run={run}
+                          busy={busy}
+                          onAdvance={advance}
+                          onChange={refresh}
+                          notify={notify}
+                          onSelect={openRunId}
+                        />
+                      ))
+                    ) : (
+                      <Panel>
+                        <Empty
+                          title="Todas as entregas foram revisadas"
+                          detail="Novos resultados aparecerão aqui para você aceitar ou rejeitar."
+                        />
+                      </Panel>
+                    )}
+                  </div>
                 )}
                 {kindFor[section] && (
                   <Catalog
@@ -860,7 +984,10 @@ function Workspace({ session }: { session: Session }) {
                       </p>
                       <p className="integration-line">
                         <span>Execução</span>
-                        <span>Até 30 tarefas/dia · 1 ativa por conta</span>
+                        <span>
+                          Até 30 tarefas/dia · 1 ativa por conta · processamento
+                          no servidor
+                        </span>
                       </p>
                     </Panel>
                     <h2 className="section-title">Projetos</h2>

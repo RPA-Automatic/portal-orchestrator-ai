@@ -1,16 +1,26 @@
 # Modelo de dados do control plane
 
-> Status: Rascunho  
-> Responsável: @RodrigoFreitas16n91  
-> Versão: 0.2  
-> Última revisão: 2026-09-13  
-> Próxima revisão: antes da primeira migration multi-tenant  
-> Documentos relacionados: [Catálogo documental](../README.md)  
+> Status: Rascunho
+> Responsável: @RodrigoFreitas16n91
+> Versão: 0.2
+> Última revisão: 2026-09-26
+> Próxima revisão: antes da primeira migration multi-tenant
+> Documentos relacionados: [Catálogo documental](../README.md)
 > Relacionados: [`../architecture/SDD.md`](../architecture/SDD.md), [`../decisions/ADR-0001-separacao-dos-portais.md`](../decisions/ADR-0001-separacao-dos-portais.md)
 
 ## Estado atual
 
 As tabelas `ao_*` implementam workspaces individuais, recursos, memória, execuções, eventos e credenciais privadas. O schema atual é a autoridade para comportamento implementado; os grupos abaixo descrevem evolução planejada e não autorizam migrations.
+
+## Runtime implementado em 26/09/2026
+
+- `ao_runs`: fila, modo, template, agenda de origem, lease, início/fim, snapshot e estado.
+- `ao_run_steps`: etapas consultáveis por run/índice, com proprietário, agente, conteúdo, tokens e conclusão; escritas somente pelo backend.
+- `ao_schedules`: frequência, próxima execução, ativação, snapshot preservado, última execução e erro seguro. RLS por proprietário; alterações via API autenticada.
+- `ao_events`: histórico de transições gerado por trigger.
+- `billing_legacy`: arquivo das entidades fiscais, fora da API pública; nenhum dado foi excluído.
+
+A fila usa a própria tabela de jobs. PGMQ e outro motor não foram adicionados porque o lease transacional atende ao processamento curto atual. As tabelas abaixo continuam sendo evolução planejada.
 
 ## Tenancy e acesso — planejado
 

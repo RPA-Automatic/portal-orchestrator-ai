@@ -1,6 +1,6 @@
 # Portal Orchestrator AI
 
-Portal pessoal de agentes e automações, com interface em português, frontend React/TypeScript na Netlify e backend Supabase.
+Portal de agentes e automações da RPA Automatic, com interface em português, frontend React/TypeScript na Netlify e backend Supabase.
 
 - Aplicação: https://portal-orchestrator-ai.netlify.app
 - Repositório: RPA-Automatic/portal-orchestrator-ai. A `main` publica produção; a `dev` recebe integração contínua.
@@ -21,9 +21,12 @@ As credenciais dos plugins do ChatGPT não são transferidas automaticamente par
 |---|---|
 | Autenticação | Supabase Auth, e-mail/senha, cadastro e encerramento de sessão |
 | Workspace | Criado no primeiro acesso; dados isolados por proprietário |
-| Tarefas | Persistência, fila, processamento sequencial, cancelamento, recuperação de etapa interrompida |
+| Tarefas | Fila persistente, execução no servidor, cancelamento e reexecução com histórico |
 | Agentes | CRUD e instruções personalizadas; snapshot por execução |
-| Fluxos | Sequência de até quatro agentes; `config.agent_ids` define a ordem |
+| Fluxos | Editor de até quatro etapas com seleção de agentes e snapshot por execução |
+| Biblioteca | Três automações por regras e um fluxo de agentes com IA |
+| Agendamentos | Criar, editar, ativar e pausar; execução horária, diária ou semanal |
+| Monitoramento | Fila, falhas, etapas, tokens e exportação de relatório |
 | Skills e instruções | CRUD; até oito blocos de contexto incluídos no snapshot |
 | Memória | Cadastro, leitura e exclusão; três memórias recentes usadas por etapa de IA |
 | Code Assist | Consulta de diretórios e arquivos da branch dev, inclusão do arquivo no objetivo |
@@ -34,9 +37,9 @@ As credenciais dos plugins do ChatGPT não são transferidas automaticamente par
 
 ## Limites desta entrega
 
-Esta implementação é a primeira versão operacional do SDD, não a implementação integral de todas as capacidades futuras. Os agentes produzem textos e propostas de código; não executam shell, testes de projetos ou alterações de repositório. Aceitar uma entrega não cria um PR ou um deploy. Os recursos MCP e projetos são cadastros de configuração; descoberta/execução de ferramentas MCP, workers isolados, agendamentos, filas transacionais RPA, embeddings e múltiplos provedores ainda precisam de runtime próprio. A memória usa recência, não busca vetorial.
+O servidor executa etapas curtas por um despachante a cada minuto; fechar a aba não interrompe as etapas seguintes. O frontend atualiza os dados a cada cinco segundos. Agendas preservam a versão dos agentes e podem ser pausadas. Etapas interrompidas falham após três minutos; reexecutar é uma ação explícita.
 
-O processamento de etapas é iniciado pelo frontend e cada chamada é concluída no backend. Fechar a aba pode deixar etapas subsequentes na fila; use Continuar execução. Uma etapa interrompida pode ser marcada como falha após dois minutos. Não há worker contínuo instalado. A interface consulta alterações a cada dez segundos; não utiliza Realtime nesta versão.
+Os agentes com IA geram conteúdo e propostas. Execução de shell, ferramentas MCP, alterações de repositório, containers de clientes, SSO, compartilhamento de equipes e cobrança de assinatura continuam planejados. Aceitar uma entrega registra a decisão humana. A memória usa recência, não busca vetorial. O runtime não tem SLA empresarial ou carga de grande escala homologados.
 
 O modo Demonstração produz textos fixos identificados e não consome IA. O modo IA requer chave e saldo no provedor; até 30 tarefas por dia, uma ativa por usuário, até quatro etapas e até 1.600 tokens de saída por etapa. Esses limites não constituem limite financeiro rígido.
 
@@ -55,7 +58,7 @@ npm test
 
 ## Backend e deploy
 
-As migrações `20260906002918` e `20260909232214` correspondem ao histórico do projeto. Não reaplique migrações já registradas. Em um projeto novo, aplique ambas na ordem e ajuste o endereço/chave publicável do cliente e os domínios CORS/CSP.
+As migrations em `supabase/migrations/` incluem fila, agendas, etapas, despachante e isolamento do domínio fiscal. Não reaplique versões já registradas. Em um projeto novo, aplique em ordem e configure o endereço da função no despachante, o cliente e os domínios CORS/CSP. O histórico remoto anterior a setembro contém migrations fiscais preservadas como histórico; não devem ser copiadas para uma instalação nova do Orchestrator.
 
 ```bash
 supabase link --project-ref lvsocwetuhhqxlwyfdrw
@@ -74,7 +77,9 @@ Netlify: build `npm run build`, publish `dist`, configuração em `netlify.toml`
 - [Índice documental](docs/README.md)
 - [SDD atual](docs/architecture/SDD.md)
 - [Catálogo de agentes](docs/product/agent-catalog.md)
-- [Validação e pendências](docs/quality/validation.md)
+- [Homologação desta entrega](docs/quality/release-2026-09-26.md)
+- [Operação e limites](docs/operations/runtime.md)
+- [Validação histórica](docs/quality/validation.md)
 - [Supabase Auth](https://supabase.com/docs/reference/javascript/auth-signinwithpassword)
 
 Rollback: redeploy da versão anterior na Netlify; a função anterior está no histórico Supabase. Antes de desfazer migrations, exporte dados `ao_*`; não remova tabelas de outros processos do projeto compartilhado.
